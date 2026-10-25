@@ -30,6 +30,7 @@
 ## 🛠️ Tech Stack
 
 - **Frontend Framework:** React 19 + TypeScript
+- **Mobile Runtime:** Capacitor 8 (Android)
 - **Build Tool:** Vite 8
 - **Styling:** Tailwind CSS 4 + Lucide Icons
 - **Effects:** Canvas-Confetti & Mobile Vibration API
@@ -37,7 +38,7 @@
 
 ---
 
-## 🚀 Quick Start (Local Setup)
+## 🚀 Quick Start (Web & Local Setup)
 
 ```bash
 # 1. Clone the repository
@@ -55,6 +56,27 @@ npm run build
 ```
 
 Open `http://localhost:5173/` or test on your mobile device over local Wi-Fi.
+
+---
+
+## 📱 Android App Setup (Capacitor)
+
+The repository comes pre-configured with **Capacitor** to build and run as a native Android app:
+
+```bash
+# 1. Build web assets and sync to native Android project
+npm run cap:sync
+
+# 2. Open the project in Android Studio
+npm run cap:open
+
+# 3. Or build, sync, and open Android Studio in one command
+npm run android
+```
+
+In **Android Studio**:
+- Click the green **Run (▶)** button to launch on an emulator or USB-connected Android device.
+- Or select **Build → Build Bundle(s) / APK(s) → Build APK(s)** to generate the standalone installable `.apk` file (`android/app/build/outputs/apk/debug/app-debug.apk`).
 
 ---
 
