@@ -20,43 +20,37 @@ export const ScoreGauge: React.FC<ScoreGaugeProps> = ({
   const isGoalAchieved = earnedPoints >= targetPoints && targetPoints > 0;
 
   useEffect(() => {
-    // Fire celebratory confetti when crossing 100%
     if (earnedPoints >= targetPoints && prevEarnedRef.current < targetPoints && targetPoints > 0) {
       confetti({
         particleCount: 50,
         spread: 60,
         origin: { y: 0.3 },
-        colors: ['#38BDF8', '#818CF8', '#34D399', '#F59E0B'],
+        colors: ['#F9A8D4', '#A5B4FC', '#FDE6C8', '#34D399'],
       });
     }
     prevEarnedRef.current = earnedPoints;
   }, [earnedPoints, targetPoints]);
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900/90 via-slate-900/70 to-slate-950 border border-slate-800 p-4 shadow-xl">
-      {/* Ambient background glow */}
-      <div className={`absolute -right-8 -bottom-8 w-32 h-32 rounded-full blur-2xl pointer-events-none transition-all duration-700 ${
-        isGoalAchieved ? 'bg-emerald-500/20' : 'bg-cyan-500/10'
-      }`}></div>
-
+    <div className="bg-streak-gradient rounded-3xl p-5 shadow-soft relative overflow-hidden">
       <div className="flex items-center justify-between relative z-10">
         <div>
-          <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
-            <Target className="w-3.5 h-3.5 text-cyan-400" />
+          <div className="flex items-center gap-1.5 text-xs text-stone-500 font-medium">
+            <Target className="w-3.5 h-3.5 text-stone-600" />
             <span>DAILY POINTS TARGET</span>
           </div>
 
           <div className="flex items-baseline gap-2 mt-1">
-            <span className="text-3xl md:text-4xl font-black text-white font-mono tracking-tight">
+            <span className="text-4xl font-black text-stone-900 tracking-tight">
               {earnedPoints}
             </span>
-            <span className="text-xs font-mono text-slate-400">
+            <span className="text-sm font-medium text-stone-500">
               / {targetPoints} pts
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5 mt-1.5 text-[11px] font-semibold text-slate-300">
-            <Zap className={`w-3.5 h-3.5 ${isGoalAchieved ? 'text-emerald-400' : 'text-cyan-400'}`} />
+          <div className="flex items-center gap-1.5 mt-1.5 text-xs font-semibold text-stone-600">
+            <Zap className={`w-3.5 h-3.5 ${isGoalAchieved ? 'text-emerald-600' : 'text-stone-500'}`} />
             <span>
               {completedHabits} of {totalHabits} completed ({percent}%)
             </span>
@@ -67,7 +61,7 @@ export const ScoreGauge: React.FC<ScoreGaugeProps> = ({
         <div className="relative w-16 h-16 flex items-center justify-center">
           <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
             <path
-              className="text-slate-800"
+              className="text-white/40"
               strokeWidth="3.5"
               stroke="currentColor"
               fill="none"
@@ -75,7 +69,7 @@ export const ScoreGauge: React.FC<ScoreGaugeProps> = ({
             />
             <path
               className={`transition-all duration-500 ease-out ${
-                isGoalAchieved ? 'text-emerald-400' : 'text-cyan-400'
+                isGoalAchieved ? 'text-emerald-500' : 'text-stone-900'
               }`}
               strokeDasharray={`${percent}, 100`}
               strokeWidth="3.5"
@@ -85,19 +79,19 @@ export const ScoreGauge: React.FC<ScoreGaugeProps> = ({
               d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
             />
           </svg>
-          <span className="absolute text-xs font-black font-mono text-slate-200">
+          <span className="absolute text-xs font-black text-stone-900">
             {percent}%
           </span>
         </div>
       </div>
 
       {/* Progress Track */}
-      <div className="w-full bg-slate-800/80 h-1.5 rounded-full mt-3 overflow-hidden">
+      <div className="w-full bg-white/40 h-1.5 rounded-full mt-3 overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-500 ${
             isGoalAchieved
-              ? 'bg-gradient-to-r from-emerald-400 to-cyan-400'
-              : 'bg-gradient-to-r from-cyan-400 via-indigo-500 to-purple-500'
+              ? 'bg-gradient-to-r from-emerald-400 to-teal-400'
+              : 'bg-gradient-to-r from-stone-700 via-stone-600 to-stone-500'
           }`}
           style={{ width: `${percent}%` }}
         ></div>

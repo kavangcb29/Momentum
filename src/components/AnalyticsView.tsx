@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { DayLog, Habit, WinterArcSettings } from '../types';
-import { Flame, Trophy, TrendingUp, Calendar, Zap, Download, Bookmark, BookOpen, ChevronRight } from 'lucide-react';
+import { TrendingUp, Calendar, Download, Bookmark, BookOpen, ChevronRight } from 'lucide-react';
 import { exportToExcelCSV } from '../utils/exportUtils';
 
 interface AnalyticsViewProps {
@@ -23,7 +23,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
   const [subTab, setSubTab] = useState<'analytics' | 'journal'>('analytics');
 
   // Generate last 35 days calendar grid
-  const days: { dateStr: string; dayNum: number; points: number; percent: number; isFuture: boolean }[] = [];
+  const days: { dateStr: string; dayNum: number; points: number; percent: number }[] = [];
   const today = new Date();
 
   for (let i = 34; i >= 0; i--) {
@@ -40,7 +40,6 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
       dayNum: d.getDate(),
       points: pts,
       percent: pct,
-      isFuture: false,
     });
   }
 
@@ -55,16 +54,16 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
     .sort((a, b) => b.date.localeCompare(a.date));
 
   return (
-    <div className="space-y-4">
-      {/* Subtab Toggle: Analytics vs Memory Journal */}
-      <div className="flex items-center justify-between bg-slate-900/90 p-1 rounded-2xl border border-slate-800">
+    <div className="space-y-4 tab-content-enter">
+      {/* Subtab Toggle */}
+      <div className="flex items-center justify-between bg-stone-100 p-1 rounded-2xl">
         <div className="flex items-center gap-1 flex-1">
           <button
             onClick={() => setSubTab('analytics')}
-            className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+            className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               subTab === 'analytics'
-                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-white text-stone-900 shadow-sm'
+                : 'text-stone-400 hover:text-stone-600'
             }`}
           >
             <TrendingUp className="w-3.5 h-3.5" />
@@ -73,101 +72,179 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
 
           <button
             onClick={() => setSubTab('journal')}
-            className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+            className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               subTab === 'journal'
-                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-white text-stone-900 shadow-sm'
+                : 'text-stone-400 hover:text-stone-600'
             }`}
           >
             <Bookmark className="w-3.5 h-3.5" />
-            <span>Memories Vault ({memorableLogs.length})</span>
+            <span>Memories ({memorableLogs.length})</span>
           </button>
         </div>
 
-        {/* 1-Click Excel Export */}
+        {/* Excel Export */}
         <button
           onClick={() => exportToExcelCSV(logs, habits, settings)}
-          className="ml-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold flex items-center gap-1 transition-all shadow-sm"
+          className="ml-2 px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold flex items-center gap-1 transition-all"
           title="Download Excel / CSV spreadsheet"
         >
           <Download className="w-3.5 h-3.5" />
-          <span>Export Excel</span>
+          <span>Export</span>
         </button>
       </div>
 
       {subTab === 'analytics' ? (
         <>
-          {/* Overview Cards */}
-          <div className="grid grid-cols-3 gap-2">
-            <div className="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-center">
-              <div className="flex items-center justify-center text-amber-400 mb-1">
-                <Flame className="w-4 h-4 fill-amber-400" />
+          {/* Hero Streak Card */}
+          <section className="bg-streak-gradient rounded-3xl p-6 flex flex-col items-center text-center shadow-soft">
+            {/* Mascots */}
+            <div className="w-full flex items-center justify-center space-x-2 my-2 animate-float">
+              {/* Orange Cloud Blob */}
+              <div className="w-11 h-9 -mb-3 scale-95 transition-transform hover:scale-105">
+                <svg className="w-full h-full drop-shadow-sm" viewBox="0 0 44 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M11 32C6.02944 32 2 27.9706 2 23C2 18.5 5.5 14.5 10 14.1C11.5 8.5 16.5 4 22.5 4C29.5 4 35 9.5 35 16.5C39 17.5 42 21 42 25.5C42 30 38.5 32 34 32H11Z" fill="#FBAA7A" />
+                  <ellipse cx="17" cy="18" rx="1.5" ry="2" fill="#292524" />
+                  <ellipse cx="27" cy="18" rx="1.5" ry="2" fill="#292524" />
+                  <path d="M20 22C21 23.5 23 23.5 24 22" stroke="#292524" strokeLinecap="round" strokeWidth="1.5" />
+                  <circle cx="14" cy="21" r="2" fill="#F472B6" fillOpacity="0.4" />
+                  <circle cx="30" cy="21" r="2" fill="#F472B6" fillOpacity="0.4" />
+                </svg>
               </div>
-              <div className="text-xl font-black font-mono text-white">{streak}</div>
-              <div className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">
-                Day Streak
+
+              {/* Pink Clover (Center) */}
+              <div className="w-16 h-16 z-10 transition-transform hover:scale-105">
+                <svg className="w-full h-full drop-shadow-md" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="8" y="14" width="48" height="36" rx="18" fill="#F9A8D4" />
+                  <rect x="14" y="8" width="36" height="48" rx="18" fill="#F9A8D4" />
+                  <ellipse cx="26" cy="30" rx="2.5" ry="3.5" fill="#1C1917" />
+                  <ellipse cx="38" cy="30" rx="2.5" ry="3.5" fill="#1C1917" />
+                  <path d="M29.5 36C31 38 33 38 34.5 36" stroke="#1C1917" strokeLinecap="round" strokeWidth="2" />
+                  <circle cx="21" cy="34" r="3.2" fill="#FB7185" fillOpacity="0.5" />
+                  <circle cx="43" cy="34" r="3.2" fill="#FB7185" fillOpacity="0.5" />
+                </svg>
+              </div>
+
+              {/* Periwinkle Bean */}
+              <div className="w-10 h-10 -mb-2 scale-90 transition-transform hover:scale-105">
+                <svg className="w-full h-full drop-shadow-sm" viewBox="0 0 40 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="2" y="2" width="36" height="42" rx="18" fill="#A5B4FC" />
+                  <ellipse cx="15" cy="22" rx="1.5" ry="2" fill="#1E1B4B" />
+                  <ellipse cx="25" cy="22" rx="1.5" ry="2" fill="#1E1B4B" />
+                  <path d="M18 26C19 27.5 21 27.5 22 26" stroke="#1E1B4B" strokeLinecap="round" strokeWidth="1.5" />
+                  <circle cx="12" cy="25" r="2" fill="#818CF8" fillOpacity="0.6" />
+                  <circle cx="28" cy="25" r="2" fill="#818CF8" fillOpacity="0.6" />
+                </svg>
               </div>
             </div>
 
-            <div className="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-center">
-              <div className="flex items-center justify-center text-cyan-400 mb-1">
-                <Trophy className="w-4 h-4" />
-              </div>
-              <div className="text-xl font-black font-mono text-white">{totalPointsAllTime}</div>
-              <div className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">
-                Total Pts
-              </div>
+            <div className="mt-2 flex flex-col items-center">
+              <span className="text-[56px] font-bold leading-none tracking-tight text-stone-900">{streak}</span>
+              <span className="text-base font-semibold text-stone-700 mt-1">days in a row</span>
             </div>
+            <p className="text-xs text-stone-500 mt-3 px-4 leading-relaxed">
+              Complete your daily targets to keep your streak growing. Best so far: {bestDay} pts in a single day.
+            </p>
+          </section>
 
-            <div className="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-center">
-              <div className="flex items-center justify-center text-emerald-400 mb-1">
-                <TrendingUp className="w-4 h-4" />
-              </div>
-              <div className="text-xl font-black font-mono text-white">{bestDay}</div>
-              <div className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">
-                Best Score
-              </div>
-            </div>
+          {/* Overview Stat Cards */}
+          <div className="grid grid-cols-2 gap-3">
+            <article className="bg-white rounded-3xl p-5 shadow-card border border-stone-100 flex flex-col justify-between min-h-[96px]">
+              <p className="text-3xl font-bold tracking-tight text-stone-900">{totalDaysLogged}</p>
+              <p className="text-xs font-normal text-stone-500 mt-1">active days</p>
+            </article>
+            <article className="bg-white rounded-3xl p-5 shadow-card border border-stone-100 flex flex-col justify-between min-h-[96px]">
+              <p className="text-3xl font-bold tracking-tight text-stone-900">{totalPointsAllTime}</p>
+              <p className="text-xs font-normal text-stone-500 mt-1">total points</p>
+            </article>
+            <article className="bg-white rounded-3xl p-5 shadow-card border border-stone-100 flex flex-col justify-between min-h-[96px]">
+              <p className="text-3xl font-bold tracking-tight text-stone-900">{habits.length}</p>
+              <p className="text-xs font-normal text-stone-500 mt-1">active habits</p>
+            </article>
+            <article className="bg-white rounded-3xl p-5 shadow-card border border-stone-100 flex flex-col justify-between min-h-[96px]">
+              <p className="text-3xl font-bold tracking-tight text-stone-900">{bestDay}</p>
+              <p className="text-xs font-normal text-stone-500 mt-1">best day score</p>
+            </article>
           </div>
 
-          {/* Consistency Heatmap */}
-          <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800">
+          {/* 7-Day Dots Row */}
+          <section className="bg-white rounded-3xl p-5 shadow-card border border-stone-100">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-[15px] font-bold text-stone-900">Last 7 days</h2>
+              <span className="text-xs font-semibold text-stone-500">
+                {days.slice(-7).filter(d => d.percent >= 70).length} of 7
+              </span>
+            </div>
+            <div className="grid grid-cols-7 gap-2 items-center text-center">
+              {days.slice(-7).map((item) => {
+                const d = new Date(item.dateStr + 'T00:00:00');
+                const dayLetter = ['S', 'M', 'T', 'W', 'T', 'F', 'S'][d.getDay()];
+                const isSelected = item.dateStr === selectedDate;
+                const met = item.percent >= 70;
+
+                return (
+                  <div key={item.dateStr} className="flex flex-col items-center space-y-2">
+                    <span className={`text-[11px] font-medium ${isSelected ? 'text-stone-900 font-semibold' : 'text-stone-400'}`}>
+                      {dayLetter}
+                    </span>
+                    <button
+                      onClick={() => onSelectDate(item.dateStr)}
+                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                        met
+                          ? 'bg-stone-900 text-white shadow-xs'
+                          : 'bg-stone-200/80'
+                      } ${isSelected ? 'ring-2 ring-stone-400 ring-offset-2' : ''}`}
+                    >
+                      {met && (
+                        <svg className="w-4 h-4 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* 35-Day Heatmap */}
+          <div className="bg-white rounded-3xl p-5 shadow-card border border-stone-100">
             <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-200">
-                <Calendar className="w-4 h-4 text-cyan-400" />
-                <span>Winter Arc Heatmap (35 Days)</span>
+              <div className="flex items-center gap-1.5 text-sm font-bold text-stone-800">
+                <Calendar className="w-4 h-4 text-stone-500" />
+                <span>Monthly Heatmap</span>
               </div>
-              <span className="text-[10px] font-mono text-slate-400">
+              <span className="text-[10px] font-medium text-stone-400">
                 {totalDaysLogged} Active Days
               </span>
             </div>
 
             <div className="grid grid-cols-7 gap-1.5 text-center">
               {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, idx) => (
-                <div key={idx} className="text-[10px] font-bold text-slate-500 pb-1">
+                <div key={idx} className="text-[10px] font-bold text-stone-400 pb-1">
                   {d}
                 </div>
               ))}
 
               {days.map((item) => {
                 const isSelected = item.dateStr === selectedDate;
-                let bgClass = 'bg-slate-950 border-slate-800 text-slate-500';
-                if (item.percent >= 80) bgClass = 'bg-cyan-400 text-slate-950 font-bold border-cyan-400';
-                else if (item.percent >= 50) bgClass = 'bg-cyan-700 text-white font-medium border-cyan-600';
-                else if (item.percent > 0) bgClass = 'bg-cyan-950/80 text-cyan-400 border-cyan-800';
+                let bgClass = 'bg-stone-100 text-stone-400';
+                if (item.percent >= 80) bgClass = 'bg-stone-900 text-white font-bold';
+                else if (item.percent >= 50) bgClass = 'bg-stone-500 text-white font-medium';
+                else if (item.percent > 0) bgClass = 'bg-stone-300 text-stone-700';
 
                 return (
                   <button
                     key={item.dateStr}
                     onClick={() => onSelectDate(item.dateStr)}
-                    className={`h-9 rounded-xl border flex flex-col items-center justify-center transition-all ${bgClass} ${
-                      isSelected ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-900 scale-105' : 'hover:opacity-80'
+                    className={`h-9 rounded-xl flex flex-col items-center justify-center transition-all ${bgClass} ${
+                      isSelected ? 'ring-2 ring-rose-400 ring-offset-2 scale-105' : 'hover:opacity-80'
                     }`}
                     title={`${item.dateStr}: ${item.points} pts (${item.percent}%)`}
                   >
                     <span className="text-[11px] leading-none">{item.dayNum}</span>
                     {item.points > 0 && (
-                      <span className="text-[8px] font-mono leading-none mt-0.5 opacity-80">
+                      <span className="text-[8px] leading-none mt-0.5 opacity-80">
                         {item.points}
                       </span>
                     )}
@@ -176,44 +253,15 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
               })}
             </div>
 
-            <div className="mt-3 pt-3 border-t border-slate-800 flex items-center justify-between text-[10px] text-slate-400">
+            <div className="mt-3 pt-3 border-t border-stone-100 flex items-center justify-between text-[10px] text-stone-400">
               <span>Less active</span>
               <div className="flex items-center gap-1">
-                <span className="w-3 h-3 rounded-md bg-slate-950 border border-slate-800"></span>
-                <span className="w-3 h-3 rounded-md bg-cyan-950 border border-cyan-800"></span>
-                <span className="w-3 h-3 rounded-md bg-cyan-700 border border-cyan-600"></span>
-                <span className="w-3 h-3 rounded-md bg-cyan-400"></span>
+                <span className="w-3 h-3 rounded-md bg-stone-100"></span>
+                <span className="w-3 h-3 rounded-md bg-stone-300"></span>
+                <span className="w-3 h-3 rounded-md bg-stone-500"></span>
+                <span className="w-3 h-3 rounded-md bg-stone-900"></span>
               </div>
               <span>Goal reached</span>
-            </div>
-          </div>
-
-          {/* Habit Breakdown */}
-          <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800">
-            <h4 className="text-xs font-bold text-slate-200 mb-2 flex items-center gap-1.5">
-              <Zap className="w-4 h-4 text-cyan-400" />
-              <span>Active Arc Focus Habits ({habits.length})</span>
-            </h4>
-            <div className="space-y-1.5">
-              {habits.map((h) => (
-                <div
-                  key={h.id}
-                  className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between text-xs"
-                >
-                  <div className="flex items-center gap-2">
-                    <span>{h.icon}</span>
-                    <span className="text-slate-200 font-medium">{h.name}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-slate-400 font-medium px-2 py-0.5 rounded bg-slate-800">
-                      {h.category}
-                    </span>
-                    <span className="font-mono font-bold text-cyan-400">
-                      +{h.points} pts
-                    </span>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
         </>
@@ -221,22 +269,22 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
         /* Memory Journal Timeline */
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
-            <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
-              <BookOpen className="w-4 h-4 text-purple-400" />
+            <h4 className="text-sm font-bold text-stone-800 flex items-center gap-1.5">
+              <BookOpen className="w-4 h-4 text-violet-500" />
               <span>Memorable Moments Timeline</span>
             </h4>
-            <span className="text-[11px] text-slate-400">
-              {memorableLogs.length} memories logged
+            <span className="text-xs text-stone-400">
+              {memorableLogs.length} memories
             </span>
           </div>
 
           {memorableLogs.length === 0 ? (
-            <div className="p-8 rounded-2xl bg-slate-900/40 border border-dashed border-slate-800 text-center space-y-2">
-              <p className="text-xs text-slate-400">
+            <div className="p-8 rounded-3xl bg-white border border-dashed border-stone-200 text-center space-y-2 shadow-card">
+              <p className="text-xs text-stone-500">
                 No memorable moments recorded yet.
               </p>
-              <p className="text-[11px] text-slate-500">
-                Write daily highlights on the tracker tab to build your month-end reflection archive.
+              <p className="text-[11px] text-stone-400">
+                Write daily highlights on the Daily tab to build your reflection archive.
               </p>
             </div>
           ) : (
@@ -253,22 +301,22 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
                   <div
                     key={log.date}
                     onClick={() => onSelectDate(log.date)}
-                    className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800/90 hover:border-purple-500/40 transition-all cursor-pointer space-y-1.5 group"
+                    className="p-4 rounded-3xl bg-white border border-stone-100 hover:border-violet-200 transition-all cursor-pointer space-y-2 group shadow-card"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-purple-300 flex items-center gap-1">
-                        <Bookmark className="w-3.5 h-3.5 fill-purple-400/20 text-purple-400" />
-                        <span>{formattedDate} ({log.date})</span>
+                      <span className="text-xs font-bold text-violet-600 flex items-center gap-1">
+                        <Bookmark className="w-3.5 h-3.5 fill-violet-100 text-violet-500" />
+                        <span>{formattedDate}</span>
                       </span>
                       <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-mono font-bold text-cyan-400">
+                        <span className="text-[11px] font-bold text-stone-500">
                           {log.totalPoints} pts
                         </span>
-                        <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-purple-300 transition-colors" />
+                        <ChevronRight className="w-3.5 h-3.5 text-stone-300 group-hover:text-violet-400 transition-colors" />
                       </div>
                     </div>
 
-                    <p className="text-xs text-slate-300 leading-relaxed italic bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/40">
+                    <p className="text-xs text-stone-600 leading-relaxed italic bg-stone-50 p-3 rounded-2xl border border-stone-100">
                       "{log.memorableMoment}"
                     </p>
                   </div>
