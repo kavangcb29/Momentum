@@ -41,17 +41,17 @@ export const MemorableMomentCard: React.FC<MemorableMomentCardProps> = ({
   };
 
   return (
-    <div className="p-5 rounded-3xl bg-white border border-stone-200 shadow-card space-y-3 relative overflow-hidden group">
+    <div className="p-5 rounded-3xl bg-white dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 shadow-card space-y-3 relative overflow-hidden group transition-colors">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-2xl bg-violet-50 text-violet-500 border border-violet-100">
+          <div className="p-2 rounded-2xl bg-violet-50 dark:bg-violet-950/40 text-violet-500 dark:text-violet-400 border border-violet-100 dark:border-violet-900/40">
             <Bookmark className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-xs font-bold text-stone-800 uppercase tracking-wider flex items-center gap-1.5">
+            <h3 className="text-xs font-bold text-stone-800 dark:text-stone-200 uppercase tracking-wider flex items-center gap-1.5">
               <span>Memorable Moment</span>
               {isToday && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded-lg bg-violet-50 text-violet-500 font-semibold lowercase border border-violet-100">
+                <span className="text-[10px] px-1.5 py-0.5 rounded-lg bg-violet-50 dark:bg-violet-950/40 text-violet-600 dark:text-violet-300 font-semibold lowercase border border-violet-100 dark:border-violet-800">
                   today
                 </span>
               )}
@@ -65,7 +65,7 @@ export const MemorableMomentCard: React.FC<MemorableMomentCardProps> = ({
         {/* Auto-save status indicator */}
         <div className="flex items-center gap-1 text-[11px]">
           {isSaved ? (
-            <span className="flex items-center gap-1 text-emerald-600 font-bold">
+            <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold">
               <Check className="w-3.5 h-3.5" /> Saved
             </span>
           ) : text && text !== memorableMoment ? (
@@ -82,7 +82,7 @@ export const MemorableMomentCard: React.FC<MemorableMomentCardProps> = ({
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
           placeholder="What made today stand out? A great workout, a breakthrough, a lesson learned, or something you're grateful for..."
-          className="w-full bg-stone-50 border border-stone-200 rounded-2xl p-3 text-xs text-stone-700 placeholder-stone-400 focus:outline-none focus:border-violet-300 focus:ring-2 focus:ring-violet-100 transition-all resize-none leading-relaxed"
+          className="w-full bg-stone-50 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700/80 rounded-2xl p-3 text-xs text-stone-700 dark:text-stone-200 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:border-violet-300 dark:focus:border-violet-500 focus:ring-2 focus:ring-violet-100 dark:focus:ring-violet-900/30 transition-all resize-none leading-relaxed"
         />
       </div>
 
@@ -95,7 +95,7 @@ export const MemorableMomentCard: React.FC<MemorableMomentCardProps> = ({
             setIsSaved(true);
             setTimeout(() => setIsSaved(false), 2000);
           }}
-          className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-600 font-semibold transition-all flex items-center gap-1"
+          className="px-3 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 font-semibold transition-all flex items-center gap-1"
         >
           <Check className="w-3 h-3" />
           <span>Save</span>

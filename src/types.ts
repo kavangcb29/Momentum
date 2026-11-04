@@ -21,6 +21,7 @@ export interface DayLog {
   memorableMoment?: string;
   highlight?: string;
   notes?: string;
+  isRestDay?: boolean;
 }
 
 export interface WinterArcSettings {

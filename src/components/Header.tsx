@@ -1,5 +1,19 @@
 import React from 'react';
-import { Flame, Sparkles, Plus, BarChart2, CheckCircle2, ListChecks } from 'lucide-react';
+import {
+  Flame,
+  Sparkles,
+  Plus,
+  BarChart2,
+  CheckCircle2,
+  ListChecks,
+  Sun,
+  Moon,
+  Volume2,
+  VolumeX,
+  LayoutDashboard,
+  Smartphone,
+  Command,
+} from 'lucide-react';
 
 export type AppTab = 'daily' | 'challenges' | 'progress';
 
@@ -12,6 +26,13 @@ interface HeaderProps {
   activeTab: AppTab;
   setActiveTab: (tab: AppTab) => void;
   onSelectDate: (date: string) => void;
+  isDarkMode: boolean;
+  onToggleDarkMode: () => void;
+  isMuted: boolean;
+  onToggleSound: () => void;
+  layoutMode: 'mobile' | 'dashboard';
+  onToggleLayoutMode: () => void;
+  onOpenShortcuts: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -22,6 +43,13 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAdd,
   activeTab,
   setActiveTab,
+  isDarkMode,
+  onToggleDarkMode,
+  isMuted,
+  onToggleSound,
+  layoutMode,
+  onToggleLayoutMode,
+  onOpenShortcuts,
 }) => {
   const isToday = selectedDate === currentDate;
 
@@ -37,40 +65,80 @@ export const Header: React.FC<HeaderProps> = ({
   ];
 
   return (
-    <header className="sticky top-0 z-30 bg-[#F9F8F5]/90 backdrop-blur-md border-b border-stone-200/80 px-4 pt-3 pb-2">
-      <div className="max-w-md mx-auto">
+    <header className="sticky top-0 z-30 bg-[#F9F8F5]/90 dark:bg-stone-900/90 backdrop-blur-md border-b border-stone-200/80 dark:border-stone-800 px-4 pt-3 pb-2 transition-colors">
+      <div className={`mx-auto transition-all duration-300 ${layoutMode === 'dashboard' ? 'max-w-5xl' : 'max-w-md'}`}>
         {/* Top row: logo, date, actions */}
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <h1 className="text-lg font-black tracking-tight text-stone-900 flex items-center gap-1.5">
+        <div className="flex items-center justify-between mb-3 gap-2">
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg font-black tracking-tight text-stone-900 dark:text-stone-100 flex items-center gap-1.5">
               Momentum
-              <span className="text-xs font-normal text-stone-400">
+              <span className="text-xs font-normal text-stone-400 dark:text-stone-500">
                 • {isToday ? 'Today' : formatDateLabel(selectedDate)}
               </span>
             </h1>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             {/* Streak Badge */}
-            <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-600 text-xs font-bold">
+            <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-900/60 text-amber-600 dark:text-amber-400 text-xs font-bold shadow-xs">
               <Flame className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
               <span>{streak}d</span>
             </div>
 
+            {/* Sound Toggle */}
+            <button
+              onClick={onToggleSound}
+              className={`p-2 rounded-full border transition-all shadow-xs ${
+                isMuted
+                  ? 'bg-stone-100 dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-400'
+                  : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-200 hover:scale-105'
+              }`}
+              title={isMuted ? 'Unmute Audio Chimes (S)' : 'Mute Audio Chimes (S)'}
+            >
+              {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+            </button>
+
+            {/* Dark / Light Mode Toggle */}
+            <button
+              onClick={onToggleDarkMode}
+              className="p-2 rounded-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-all shadow-xs"
+              title={isDarkMode ? 'Switch to Warm Light Theme (D)' : 'Switch to Dark Theme (D)'}
+            >
+              {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
+            </button>
+
+            {/* Desktop Dashboard / Mobile Phone view toggle (hidden on tiny screens) */}
+            <button
+              onClick={onToggleLayoutMode}
+              className="hidden sm:flex p-2 rounded-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-all shadow-xs"
+              title={layoutMode === 'dashboard' ? 'Switch to Mobile Preview Frame (V)' : 'Switch to Desktop Dashboard View (V)'}
+            >
+              {layoutMode === 'dashboard' ? <Smartphone className="w-4 h-4" /> : <LayoutDashboard className="w-4 h-4 text-stone-800 dark:text-stone-200" />}
+            </button>
+
+            {/* Keyboard Shortcuts Guide */}
+            <button
+              onClick={onOpenShortcuts}
+              className="hidden md:flex p-2 rounded-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 transition-all shadow-xs"
+              title="Keyboard Shortcuts (?)"
+            >
+              <Command className="w-4 h-4" />
+            </button>
+
             {/* Import */}
             <button
               onClick={onOpenImport}
-              className="p-2 rounded-full bg-white border border-stone-200 text-stone-600 hover:bg-stone-50 transition-all shadow-sm"
-              title="Import from Gemini Notebook"
+              className="p-2 rounded-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-all shadow-xs"
+              title="Import from Gemini Notebook (I)"
             >
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="w-4 h-4 text-amber-500" />
             </button>
 
             {/* Add Habit */}
             <button
               onClick={onOpenAdd}
-              className="p-2 rounded-full bg-stone-900 text-white hover:bg-stone-800 transition-all shadow-sm"
-              title="Add Habit"
+              className="p-2 rounded-full bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 hover:bg-stone-800 dark:hover:bg-white transition-all shadow-xs"
+              title="Add Habit (N)"
             >
               <Plus className="w-4 h-4" />
             </button>
@@ -78,15 +146,15 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Three-Tab Navigation */}
-        <div className="flex items-center bg-stone-100 p-1 rounded-2xl text-sm">
+        <div className="flex items-center bg-stone-100 dark:bg-stone-800/80 p-1 rounded-2xl text-sm">
           {tabs.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={`flex-1 py-2 rounded-xl font-semibold flex items-center justify-center gap-1.5 transition-all duration-200 ${
                 activeTab === tab.key
-                  ? 'bg-white text-stone-900 shadow-sm'
-                  : 'text-stone-400 hover:text-stone-600'
+                  ? 'bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 shadow-sm'
+                  : 'text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-300'
               }`}
             >
               {tab.icon}

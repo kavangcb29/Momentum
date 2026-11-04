@@ -43,16 +43,16 @@ export const GeminiImportModal: React.FC<GeminiImportModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/40 backdrop-blur-sm animate-fadeIn">
-      <div className="w-full max-w-lg bg-white border border-stone-200 rounded-3xl p-6 shadow-2xl relative max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/50 backdrop-blur-sm animate-fadeIn">
+      <div className="w-full max-w-lg bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-3xl p-6 shadow-2xl relative max-h-[90vh] flex flex-col transition-colors">
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+        <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200">
+            <div className="p-2 rounded-2xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-900/50">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-stone-900 text-base">
+              <h3 className="font-bold text-stone-900 dark:text-stone-100 text-base">
                 Import from Gemini Notebook
               </h3>
               <p className="text-xs text-stone-400">
@@ -62,7 +62,7 @@ export const GeminiImportModal: React.FC<GeminiImportModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-stone-400 hover:text-stone-700 rounded-full hover:bg-stone-100 transition-colors"
+            className="p-1.5 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -71,7 +71,7 @@ export const GeminiImportModal: React.FC<GeminiImportModalProps> = ({
         {/* Body Content */}
         <div className="py-4 space-y-4 overflow-y-auto flex-1 pr-1">
           <div>
-            <label className="block text-xs font-semibold text-stone-700 mb-1.5">
+            <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
               Paste Notebook Text / Markdown / JSON
             </label>
             <textarea
@@ -82,7 +82,7 @@ export const GeminiImportModal: React.FC<GeminiImportModalProps> = ({
                 setHasParsed(false);
               }}
               placeholder="Paste markdown checklist or JSON array..."
-              className="w-full bg-stone-50 border border-stone-200 rounded-2xl p-3 text-xs font-mono text-stone-800 placeholder-stone-400 focus:outline-none focus:border-stone-400 focus:ring-2 focus:ring-stone-100 transition-all resize-none"
+              className="w-full bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-3 text-xs font-mono text-stone-800 dark:text-stone-100 placeholder-stone-400 focus:outline-none focus:border-stone-400 focus:ring-2 focus:ring-stone-100 dark:focus:ring-stone-800 transition-all resize-none"
             />
           </div>
 
@@ -90,7 +90,7 @@ export const GeminiImportModal: React.FC<GeminiImportModalProps> = ({
             <button
               type="button"
               onClick={handlePreview}
-              className="px-4 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
+              className="px-4 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-500" />
               <span>Parse & Preview ({hasParsed ? parsedHabits.length : 'Click'})</span>
@@ -102,12 +102,12 @@ export const GeminiImportModal: React.FC<GeminiImportModalProps> = ({
 
           {/* Parsed Preview */}
           {hasParsed && (
-            <div className="space-y-2 pt-2 border-t border-stone-100">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-stone-500">
+            <div className="space-y-2 pt-2 border-t border-stone-100 dark:border-stone-800">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400">
                 Detected Habits ({parsedHabits.length})
               </h4>
               {parsedHabits.length === 0 ? (
-                <div className="p-3 rounded-2xl bg-rose-50 border border-rose-100 text-rose-600 text-xs flex items-center gap-2">
+                <div className="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900 text-rose-600 dark:text-rose-400 text-xs flex items-center gap-2">
                   <AlertCircle className="w-4 h-4" />
                   <span>No valid habits detected. Check your text format.</span>
                 </div>
@@ -116,17 +116,17 @@ export const GeminiImportModal: React.FC<GeminiImportModalProps> = ({
                   {parsedHabits.map((h, i) => (
                     <div
                       key={i}
-                      className="p-2.5 rounded-2xl bg-stone-50 border border-stone-100 flex items-center justify-between text-xs"
+                      className="p-2.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-100 dark:border-stone-700 flex items-center justify-between text-xs"
                     >
                       <div className="flex items-center gap-2 truncate">
                         <span>{h.icon || '⚡'}</span>
-                        <span className="text-stone-800 font-medium truncate">{h.name}</span>
+                        <span className="text-stone-800 dark:text-stone-100 font-medium truncate">{h.name}</span>
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        <span className="text-[10px] text-stone-500 px-2 py-0.5 rounded-full bg-white border border-stone-200">
+                        <span className="text-[10px] text-stone-500 dark:text-stone-400 px-2 py-0.5 rounded-full bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700">
                           {h.category}
                         </span>
-                        <span className="text-[11px] font-bold text-stone-700">
+                        <span className="text-[11px] font-bold text-stone-700 dark:text-stone-300">
                           +{h.points} pts
                         </span>
                       </div>
@@ -139,17 +139,17 @@ export const GeminiImportModal: React.FC<GeminiImportModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="pt-3 border-t border-stone-100 flex items-center justify-end gap-2">
+        <div className="pt-3 border-t border-stone-100 dark:border-stone-800 flex items-center justify-end gap-2">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl text-stone-500 hover:text-stone-800 text-xs font-semibold"
+            className="px-4 py-2 rounded-xl text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 text-xs font-semibold"
           >
             Cancel
           </button>
           <button
             disabled={!hasParsed || parsedHabits.length === 0}
             onClick={handleConfirm}
-            className="px-5 py-2.5 rounded-full bg-stone-900 hover:bg-black disabled:opacity-40 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all"
+            className="px-5 py-2.5 rounded-full bg-stone-900 dark:bg-stone-100 hover:bg-black dark:hover:bg-white disabled:opacity-40 text-white dark:text-stone-900 font-semibold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all"
           >
             <Check className="w-4 h-4 stroke-[3]" />
             <span>Apply to Momentum</span>

@@ -215,7 +215,7 @@ export function calculateStreak(logs: Record<string, DayLog>, targetPoints: numb
 
   const todayStr = checkDate.toISOString().split('T')[0];
   const todayLog = logs[todayStr];
-  if (todayLog && todayLog.totalPoints >= threshold) {
+  if (todayLog && (todayLog.totalPoints >= threshold || todayLog.isRestDay)) {
     streak++;
   }
 
@@ -224,7 +224,7 @@ export function calculateStreak(logs: Record<string, DayLog>, targetPoints: numb
     const dateStr = checkDate.toISOString().split('T')[0];
     const log = logs[dateStr];
 
-    if (log && log.totalPoints >= threshold) {
+    if (log && (log.totalPoints >= threshold || log.isRestDay)) {
       streak++;
     } else {
       break;

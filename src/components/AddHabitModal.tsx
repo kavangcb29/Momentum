@@ -65,16 +65,16 @@ export const AddHabitModal: React.FC<AddHabitModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/40 backdrop-blur-sm animate-fadeIn">
-      <div className="w-full max-w-md bg-white border border-stone-200 rounded-3xl p-6 shadow-2xl relative max-h-[90vh] flex flex-col">
-        <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/50 backdrop-blur-sm animate-fadeIn">
+      <div className="w-full max-w-md bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-3xl p-6 shadow-2xl relative max-h-[90vh] flex flex-col transition-colors">
+        <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800">
           <div>
-            <h3 className="font-bold text-stone-900 text-base">New Challenge / Habit</h3>
+            <h3 className="font-bold text-stone-900 dark:text-stone-100 text-base">New Challenge / Habit</h3>
             <p className="text-xs text-stone-400">Add a protocol to your active daily tracking</p>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-stone-400 hover:text-stone-700 rounded-full hover:bg-stone-100 transition-colors"
+            className="p-1.5 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -82,7 +82,7 @@ export const AddHabitModal: React.FC<AddHabitModalProps> = ({
 
         <form onSubmit={handleSubmit} className="py-3 space-y-3.5 overflow-y-auto flex-1 pr-1">
           <div>
-            <label className="block text-xs font-semibold text-stone-700 mb-1">
+            <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
               Habit Name
             </label>
             <input
@@ -91,13 +91,13 @@ export const AddHabitModal: React.FC<AddHabitModalProps> = ({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. 90-Min Daily Study Sprint"
-              className="w-full bg-stone-50 border border-stone-200 rounded-2xl px-3.5 py-2.5 text-sm text-stone-800 focus:outline-none focus:border-stone-400 focus:ring-2 focus:ring-stone-100 transition-all"
+              className="w-full bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl px-3.5 py-2.5 text-sm text-stone-800 dark:text-stone-100 focus:outline-none focus:border-stone-400 dark:focus:border-stone-500 focus:ring-2 focus:ring-stone-100 dark:focus:ring-stone-800 transition-all"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-stone-700 mb-1">
+              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
                 Points Weight
               </label>
               <input
@@ -106,21 +106,21 @@ export const AddHabitModal: React.FC<AddHabitModalProps> = ({
                 max="100"
                 value={points}
                 onChange={(e) => setPoints(Number(e.target.value))}
-                className="w-full bg-stone-50 border border-stone-200 rounded-2xl px-3.5 py-2.5 text-sm font-semibold text-stone-800 focus:outline-none focus:border-stone-400 focus:ring-2 focus:ring-stone-100 transition-all"
+                className="w-full bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl px-3.5 py-2.5 text-sm font-semibold text-stone-800 dark:text-stone-100 focus:outline-none focus:border-stone-400 transition-all"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-stone-700 mb-1">
+              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
                 Category
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as Habit['category'])}
-                className="w-full bg-stone-50 border border-stone-200 rounded-2xl px-3 py-2.5 text-xs text-stone-800 focus:outline-none focus:border-stone-400 focus:ring-2 focus:ring-stone-100 transition-all"
+                className="w-full bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl px-3 py-2.5 text-xs text-stone-800 dark:text-stone-100 focus:outline-none focus:border-stone-400 transition-all"
               >
                 {CATEGORIES.map((c) => (
-                  <option key={c} value={c}>
+                  <option key={c} value={c} className="dark:bg-stone-800">
                     {c}
                   </option>
                 ))}
@@ -129,7 +129,7 @@ export const AddHabitModal: React.FC<AddHabitModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-stone-700 mb-1.5">
+            <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
               Icon Emoji
             </label>
             <div className="flex flex-wrap gap-1.5">
@@ -140,8 +140,8 @@ export const AddHabitModal: React.FC<AddHabitModalProps> = ({
                   onClick={() => setIcon(e)}
                   className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm border transition-all ${
                     icon === e
-                      ? 'bg-stone-900 border-stone-900 text-white shadow-sm scale-105'
-                      : 'bg-stone-50 border-stone-200 hover:bg-stone-100'
+                      ? 'bg-stone-900 dark:bg-stone-100 border-stone-900 dark:border-stone-100 text-white dark:text-stone-900 shadow-sm scale-105'
+                      : 'bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200'
                   }`}
                 >
                   {e}
@@ -151,7 +151,7 @@ export const AddHabitModal: React.FC<AddHabitModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-stone-700 mb-1">
+            <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
               Strict Rule (Optional)
             </label>
             <textarea
@@ -159,12 +159,12 @@ export const AddHabitModal: React.FC<AddHabitModalProps> = ({
               value={strictRule}
               onChange={(e) => setStrictRule(e.target.value)}
               placeholder="e.g. Execute 90 minutes of deep work without phone distraction."
-              className="w-full bg-stone-50 border border-stone-200 rounded-2xl p-2.5 text-xs text-stone-800 placeholder-stone-400 focus:outline-none focus:border-stone-400 resize-none transition-all"
+              className="w-full bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-2.5 text-xs text-stone-800 dark:text-stone-100 placeholder-stone-400 focus:outline-none focus:border-stone-400 resize-none transition-all"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-stone-700 mb-1">
+            <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
               Minimum Resilient Floor (Optional)
             </label>
             <input
@@ -172,12 +172,12 @@ export const AddHabitModal: React.FC<AddHabitModalProps> = ({
               value={minResilient}
               onChange={(e) => setMinResilient(e.target.value)}
               placeholder="e.g. 15 minutes reviewing lecture notes on low-energy days."
-              className="w-full bg-stone-50 border border-stone-200 rounded-2xl px-3 py-2 text-xs text-stone-800 placeholder-stone-400 focus:outline-none focus:border-stone-400 transition-all"
+              className="w-full bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl px-3 py-2 text-xs text-stone-800 dark:text-stone-100 placeholder-stone-400 focus:outline-none focus:border-stone-400 transition-all"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-stone-700 mb-1">
+            <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
               Scientific Rationale (Optional)
             </label>
             <input
@@ -185,21 +185,21 @@ export const AddHabitModal: React.FC<AddHabitModalProps> = ({
               value={scientificRationale}
               onChange={(e) => setScientificRationale(e.target.value)}
               placeholder="e.g. Protects REM sleep architecture and memory consolidation."
-              className="w-full bg-stone-50 border border-stone-200 rounded-2xl px-3 py-2 text-xs text-stone-800 placeholder-stone-400 focus:outline-none focus:border-stone-400 transition-all"
+              className="w-full bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl px-3 py-2 text-xs text-stone-800 dark:text-stone-100 placeholder-stone-400 focus:outline-none focus:border-stone-400 transition-all"
             />
           </div>
 
-          <div className="pt-3 border-t border-stone-100 flex items-center justify-end gap-2">
+          <div className="pt-3 border-t border-stone-100 dark:border-stone-800 flex items-center justify-end gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold text-stone-500 hover:text-stone-800 rounded-xl"
+              className="px-4 py-2 text-xs font-semibold text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 rounded-xl"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-5 py-2.5 rounded-full bg-stone-900 hover:bg-black text-white font-semibold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all"
+              className="px-5 py-2.5 rounded-full bg-stone-900 dark:bg-stone-100 hover:bg-black dark:hover:bg-white text-white dark:text-stone-900 font-semibold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all"
             >
               <Plus className="w-4 h-4" />
               <span>Create Challenge</span>

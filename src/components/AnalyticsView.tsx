@@ -56,14 +56,14 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
   return (
     <div className="space-y-4 tab-content-enter">
       {/* Subtab Toggle */}
-      <div className="flex items-center justify-between bg-stone-100 p-1 rounded-2xl">
+      <div className="flex items-center justify-between bg-stone-100 dark:bg-stone-800/80 p-1 rounded-2xl transition-colors">
         <div className="flex items-center gap-1 flex-1">
           <button
             onClick={() => setSubTab('analytics')}
             className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               subTab === 'analytics'
-                ? 'bg-white text-stone-900 shadow-sm'
-                : 'text-stone-400 hover:text-stone-600'
+                ? 'bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 shadow-sm'
+                : 'text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-300'
             }`}
           >
             <TrendingUp className="w-3.5 h-3.5" />
@@ -74,8 +74,8 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
             onClick={() => setSubTab('journal')}
             className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               subTab === 'journal'
-                ? 'bg-white text-stone-900 shadow-sm'
-                : 'text-stone-400 hover:text-stone-600'
+                ? 'bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 shadow-sm'
+                : 'text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-300'
             }`}
           >
             <Bookmark className="w-3.5 h-3.5" />
@@ -86,7 +86,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
         {/* Excel Export */}
         <button
           onClick={() => exportToExcelCSV(logs, habits, settings)}
-          className="ml-2 px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold flex items-center gap-1 transition-all"
+          className="ml-2 px-3 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-xs font-bold flex items-center gap-1 transition-all"
           title="Download Excel / CSV spreadsheet"
         >
           <Download className="w-3.5 h-3.5" />
@@ -97,7 +97,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
       {subTab === 'analytics' ? (
         <>
           {/* Hero Streak Card */}
-          <section className="bg-streak-gradient rounded-3xl p-6 flex flex-col items-center text-center shadow-soft">
+          <section className="bg-streak-gradient rounded-3xl p-6 flex flex-col items-center text-center shadow-soft border border-stone-200/50 dark:border-stone-800">
             {/* Mascots */}
             <div className="w-full flex items-center justify-center space-x-2 my-2 animate-float">
               {/* Orange Cloud Blob */}
@@ -142,36 +142,36 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
               <span className="text-[56px] font-bold leading-none tracking-tight text-stone-900">{streak}</span>
               <span className="text-base font-semibold text-stone-700 mt-1">days in a row</span>
             </div>
-            <p className="text-xs text-stone-500 mt-3 px-4 leading-relaxed">
+            <p className="text-xs text-stone-600 mt-3 px-4 leading-relaxed max-w-sm">
               Complete your daily targets to keep your streak growing. Best so far: {bestDay} pts in a single day.
             </p>
           </section>
 
-          {/* Overview Stat Cards */}
-          <div className="grid grid-cols-2 gap-3">
-            <article className="bg-white rounded-3xl p-5 shadow-card border border-stone-100 flex flex-col justify-between min-h-[96px]">
-              <p className="text-3xl font-bold tracking-tight text-stone-900">{totalDaysLogged}</p>
-              <p className="text-xs font-normal text-stone-500 mt-1">active days</p>
+          {/* Overview Stat Cards (Responsive 4-column on desktop) */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <article className="bg-white dark:bg-stone-900 rounded-3xl p-5 shadow-card border border-stone-100 dark:border-stone-800 flex flex-col justify-between min-h-[96px] transition-colors">
+              <p className="text-3xl font-bold tracking-tight text-stone-900 dark:text-stone-100">{totalDaysLogged}</p>
+              <p className="text-xs font-normal text-stone-500 dark:text-stone-400 mt-1">active days</p>
             </article>
-            <article className="bg-white rounded-3xl p-5 shadow-card border border-stone-100 flex flex-col justify-between min-h-[96px]">
-              <p className="text-3xl font-bold tracking-tight text-stone-900">{totalPointsAllTime}</p>
-              <p className="text-xs font-normal text-stone-500 mt-1">total points</p>
+            <article className="bg-white dark:bg-stone-900 rounded-3xl p-5 shadow-card border border-stone-100 dark:border-stone-800 flex flex-col justify-between min-h-[96px] transition-colors">
+              <p className="text-3xl font-bold tracking-tight text-stone-900 dark:text-stone-100">{totalPointsAllTime}</p>
+              <p className="text-xs font-normal text-stone-500 dark:text-stone-400 mt-1">total points</p>
             </article>
-            <article className="bg-white rounded-3xl p-5 shadow-card border border-stone-100 flex flex-col justify-between min-h-[96px]">
-              <p className="text-3xl font-bold tracking-tight text-stone-900">{habits.length}</p>
-              <p className="text-xs font-normal text-stone-500 mt-1">active habits</p>
+            <article className="bg-white dark:bg-stone-900 rounded-3xl p-5 shadow-card border border-stone-100 dark:border-stone-800 flex flex-col justify-between min-h-[96px] transition-colors">
+              <p className="text-3xl font-bold tracking-tight text-stone-900 dark:text-stone-100">{habits.length}</p>
+              <p className="text-xs font-normal text-stone-500 dark:text-stone-400 mt-1">active habits</p>
             </article>
-            <article className="bg-white rounded-3xl p-5 shadow-card border border-stone-100 flex flex-col justify-between min-h-[96px]">
-              <p className="text-3xl font-bold tracking-tight text-stone-900">{bestDay}</p>
-              <p className="text-xs font-normal text-stone-500 mt-1">best day score</p>
+            <article className="bg-white dark:bg-stone-900 rounded-3xl p-5 shadow-card border border-stone-100 dark:border-stone-800 flex flex-col justify-between min-h-[96px] transition-colors">
+              <p className="text-3xl font-bold tracking-tight text-stone-900 dark:text-stone-100">{bestDay}</p>
+              <p className="text-xs font-normal text-stone-500 dark:text-stone-400 mt-1">best day score</p>
             </article>
           </div>
 
           {/* 7-Day Dots Row */}
-          <section className="bg-white rounded-3xl p-5 shadow-card border border-stone-100">
+          <section className="bg-white dark:bg-stone-900 rounded-3xl p-5 shadow-card border border-stone-100 dark:border-stone-800 transition-colors">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-[15px] font-bold text-stone-900">Last 7 days</h2>
-              <span className="text-xs font-semibold text-stone-500">
+              <h2 className="text-[15px] font-bold text-stone-900 dark:text-stone-100">Last 7 days</h2>
+              <span className="text-xs font-semibold text-stone-500 dark:text-stone-400">
                 {days.slice(-7).filter(d => d.percent >= 70).length} of 7
               </span>
             </div>
@@ -184,16 +184,16 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
 
                 return (
                   <div key={item.dateStr} className="flex flex-col items-center space-y-2">
-                    <span className={`text-[11px] font-medium ${isSelected ? 'text-stone-900 font-semibold' : 'text-stone-400'}`}>
+                    <span className={`text-[11px] font-medium ${isSelected ? 'text-stone-900 dark:text-stone-100 font-bold' : 'text-stone-400'}`}>
                       {dayLetter}
                     </span>
                     <button
                       onClick={() => onSelectDate(item.dateStr)}
                       className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
                         met
-                          ? 'bg-stone-900 text-white shadow-xs'
-                          : 'bg-stone-200/80'
-                      } ${isSelected ? 'ring-2 ring-stone-400 ring-offset-2' : ''}`}
+                          ? 'bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 shadow-xs'
+                          : 'bg-stone-200/80 dark:bg-stone-800 text-stone-400'
+                      } ${isSelected ? 'ring-2 ring-stone-400 dark:ring-stone-600 ring-offset-2' : ''}`}
                     >
                       {met && (
                         <svg className="w-4 h-4 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -208,11 +208,11 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
           </section>
 
           {/* 35-Day Heatmap */}
-          <div className="bg-white rounded-3xl p-5 shadow-card border border-stone-100">
+          <div className="bg-white dark:bg-stone-900 rounded-3xl p-5 shadow-card border border-stone-100 dark:border-stone-800 transition-colors">
             <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-1.5 text-sm font-bold text-stone-800">
+              <div className="flex items-center gap-1.5 text-sm font-bold text-stone-800 dark:text-stone-200">
                 <Calendar className="w-4 h-4 text-stone-500" />
-                <span>Monthly Heatmap</span>
+                <span>Monthly Consistency Heatmap</span>
               </div>
               <span className="text-[10px] font-medium text-stone-400">
                 {totalDaysLogged} Active Days
@@ -228,10 +228,10 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
 
               {days.map((item) => {
                 const isSelected = item.dateStr === selectedDate;
-                let bgClass = 'bg-stone-100 text-stone-400';
-                if (item.percent >= 80) bgClass = 'bg-stone-900 text-white font-bold';
-                else if (item.percent >= 50) bgClass = 'bg-stone-500 text-white font-medium';
-                else if (item.percent > 0) bgClass = 'bg-stone-300 text-stone-700';
+                let bgClass = 'bg-stone-100 dark:bg-stone-800/80 text-stone-400 dark:text-stone-500';
+                if (item.percent >= 80) bgClass = 'bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 font-bold';
+                else if (item.percent >= 50) bgClass = 'bg-stone-500 dark:bg-stone-400 text-white dark:text-stone-900 font-medium';
+                else if (item.percent > 0) bgClass = 'bg-stone-300 dark:bg-stone-700 text-stone-700 dark:text-stone-200';
 
                 return (
                   <button
@@ -253,13 +253,13 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
               })}
             </div>
 
-            <div className="mt-3 pt-3 border-t border-stone-100 flex items-center justify-between text-[10px] text-stone-400">
+            <div className="mt-3 pt-3 border-t border-stone-100 dark:border-stone-800 flex items-center justify-between text-[10px] text-stone-400">
               <span>Less active</span>
               <div className="flex items-center gap-1">
-                <span className="w-3 h-3 rounded-md bg-stone-100"></span>
-                <span className="w-3 h-3 rounded-md bg-stone-300"></span>
-                <span className="w-3 h-3 rounded-md bg-stone-500"></span>
-                <span className="w-3 h-3 rounded-md bg-stone-900"></span>
+                <span className="w-3 h-3 rounded-md bg-stone-100 dark:bg-stone-800"></span>
+                <span className="w-3 h-3 rounded-md bg-stone-300 dark:bg-stone-700"></span>
+                <span className="w-3 h-3 rounded-md bg-stone-500 dark:bg-stone-400"></span>
+                <span className="w-3 h-3 rounded-md bg-stone-900 dark:bg-stone-100"></span>
               </div>
               <span>Goal reached</span>
             </div>
@@ -269,7 +269,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
         /* Memory Journal Timeline */
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
-            <h4 className="text-sm font-bold text-stone-800 flex items-center gap-1.5">
+            <h4 className="text-sm font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">
               <BookOpen className="w-4 h-4 text-violet-500" />
               <span>Memorable Moments Timeline</span>
             </h4>
@@ -279,7 +279,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
           </div>
 
           {memorableLogs.length === 0 ? (
-            <div className="p-8 rounded-3xl bg-white border border-dashed border-stone-200 text-center space-y-2 shadow-card">
+            <div className="p-8 rounded-3xl bg-white dark:bg-stone-900 border border-dashed border-stone-200 dark:border-stone-800 text-center space-y-2 shadow-card">
               <p className="text-xs text-stone-500">
                 No memorable moments recorded yet.
               </p>
@@ -301,22 +301,22 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
                   <div
                     key={log.date}
                     onClick={() => onSelectDate(log.date)}
-                    className="p-4 rounded-3xl bg-white border border-stone-100 hover:border-violet-200 transition-all cursor-pointer space-y-2 group shadow-card"
+                    className="p-4 rounded-3xl bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 hover:border-violet-200 dark:hover:border-violet-700 transition-all cursor-pointer space-y-2 group shadow-card"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-violet-600 flex items-center gap-1">
-                        <Bookmark className="w-3.5 h-3.5 fill-violet-100 text-violet-500" />
+                      <span className="text-xs font-bold text-violet-600 dark:text-violet-400 flex items-center gap-1">
+                        <Bookmark className="w-3.5 h-3.5 fill-violet-100 dark:fill-violet-950 text-violet-500" />
                         <span>{formattedDate}</span>
                       </span>
                       <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-bold text-stone-500">
+                        <span className="text-[11px] font-bold text-stone-500 dark:text-stone-400">
                           {log.totalPoints} pts
                         </span>
-                        <ChevronRight className="w-3.5 h-3.5 text-stone-300 group-hover:text-violet-400 transition-colors" />
+                        <ChevronRight className="w-3.5 h-3.5 text-stone-300 dark:text-stone-600 group-hover:text-violet-400 transition-colors" />
                       </div>
                     </div>
 
-                    <p className="text-xs text-stone-600 leading-relaxed italic bg-stone-50 p-3 rounded-2xl border border-stone-100">
+                    <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed italic bg-stone-50 dark:bg-stone-800/60 p-3 rounded-2xl border border-stone-100 dark:border-stone-800">
                       "{log.memorableMoment}"
                     </p>
                   </div>
