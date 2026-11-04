@@ -157,10 +157,16 @@ export function App() {
     }
   };
 
-  // Import habits from Gemini parser
-  const handleImportHabits = (importedHabits: Habit[]) => {
+  // Import habits and optional logs from Gemini parser
+  const handleImportHabits = (importedHabits: Habit[], importedLogs?: Record<string, DayLog>) => {
     setHabits(importedHabits);
     saveHabits(importedHabits);
+
+    if (importedLogs && Object.keys(importedLogs).length > 0) {
+      const mergedLogs = { ...logs, ...importedLogs };
+      setLogs(mergedLogs);
+      localStorage.setItem('momentum_logs_v1', JSON.stringify(mergedLogs));
+    }
 
     const totalPoints = importedHabits.reduce((acc, h) => acc + h.points, 0);
     const updatedSettings = { ...settings, dailyTargetPoints: totalPoints };
