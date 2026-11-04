@@ -1,28 +1,28 @@
 import type { Habit, DayLog, WinterArcSettings } from '../types';
 
-const HABITS_KEY = 'momentum_habits_v4';
+const HABITS_KEY = 'momentum_habits_v5';
 const LOGS_KEY = 'momentum_logs_v1';
-const SETTINGS_KEY = 'momentum_settings_v1';
+const SETTINGS_KEY = 'momentum_settings_v2';
 
 export const DEFAULT_HABITS: Habit[] = [
   {
     id: 'h1_digital_sunset',
     name: '11:00 PM Digital Sunset & 8-Hour Sleep Floor',
-    category: 'Recovery & Circadian',
-    points: 20,
+    category: 'Circadian Shield & Sleep Recovery',
+    points: 1,
     icon: '🦩',
     color: '#FF99C8',
     frequency: 'daily',
     strict_rule: 'Screens off strictly at 11:00 PM. Sleep >= 8.0 hours nightly and wake up before 8:00 AM without snooze.',
     minimum_resilient: 'Bedtime alarm set for 11:15 PM even if total sleep duration is slightly shortened.',
-    scientific_rationale: 'Protects REM and deep sleep architecture necessary for muscle protein synthesis and memory consolidation.',
+    scientific_rationale: 'Protects REM and slow-wave sleep architecture required for muscle tissue repair, protein synthesis, and cognitive memory consolidation.',
     createdAt: new Date().toISOString(),
   },
   {
     id: 'h2_gym_split',
     name: '4-Day Gym Split + Double Progression',
-    category: 'Physical Hypertrophy',
-    points: 20,
+    category: 'Physical Hypertrophy & Strength',
+    points: 1,
     icon: '🔥',
     color: '#FF9233',
     frequency: '4_times_per_week',
@@ -35,43 +35,43 @@ export const DEFAULT_HABITS: Habit[] = [
 • Fri: Lower B (Bulgarian Split Squats, Hamstring Curls, Lunges, Abs)
 • Sat & Sun: Active Recovery / Rest`,
     minimum_resilient: '10-minute bodyweight circuit or active mobility flow.',
-    scientific_rationale: 'Drives mechanical tension and myofibrillar hypertrophy while allowing central nervous system recovery.',
+    scientific_rationale: 'Drives mechanical tension and myofibrillar hypertrophy while providing structured rest days to allow complete central nervous system and joint recovery.',
     createdAt: new Date().toISOString(),
   },
   {
     id: 'h3_clean_bulk',
     name: 'Clean Bulk & 80g Protein Floor',
-    category: 'Nutrition & Bulk',
-    points: 20,
+    category: 'Nutrition & Fuel',
+    points: 1,
     icon: '🟩',
     color: '#A3FFB4',
     frequency: 'daily',
-    strict_rule: 'Hit ~2,600 kcal/day clean surplus and >= 80g protein floor daily across 4 clean whole-food meals.',
+    strict_rule: 'Hit ~2,600 kcal/day clean surplus and >= 80g protein floor daily across clean whole-food meals.',
     minimum_resilient: 'Hit 80g protein floor across Meals 1 & 2 even if total calories fluctuate.',
-    scientific_rationale: 'Fuels muscle tissue growth and maintains intramuscular glycogen hydration without digestive bloating.',
+    scientific_rationale: 'Delivers necessary amino acids and intramuscular glycogen hydration to support muscle growth without causing digestive bloating during cognitive work.',
     createdAt: new Date().toISOString(),
   },
   {
     id: 'h4_study_sprint',
     name: '90-Minute Daily Study Sprint',
-    category: 'Technical & Academics',
-    points: 20,
+    category: 'Technical Skill & Academics',
+    points: 1,
     icon: '🌊',
     color: '#90E0EF',
     frequency: 'daily',
     strict_rule: `Execute 90 minutes of deep work daily, split into three 30-minute blocks:
 • 30m SQL: Practice window functions (PARTITION BY, LAG, LEAD, DENSE_RANK)
 • 30m BA Portfolio: Process maps (Lucidchart), BRD user stories, or Power BI
-• 30m Coursework: CS assignments, lecture prep, or exam review`,
-    minimum_resilient: '15 minutes reviewing SQL query syntax or lecture slides.',
-    scientific_rationale: 'Compounds technical career capital through daily deliberate practice.',
+• 30m Coursework: Computer Science assignments, lecture prep, or exam review`,
+    minimum_resilient: '15 minutes reviewing SQL query syntax, project scope, or lecture slides.',
+    scientific_rationale: 'Builds technical career capital through daily deliberate practice and strengthens neural pathways for complex analytical problem-solving.',
     createdAt: new Date().toISOString(),
   },
   {
     id: 'h5_career_points',
     name: 'Daily Career Points System (3 Pts — Strict Model A)',
-    category: 'Career Transition',
-    points: 20,
+    category: 'Career Transition & Pipeline',
+    points: 3,
     icon: '🎯',
     color: '#FF70A6',
     frequency: 'daily',
@@ -80,17 +80,17 @@ export const DEFAULT_HABITS: Habit[] = [
 • 1 Networking / Referral LinkedIn Message = 1 Point
 • 1 Quick-Apply Application = 1 Point`,
     minimum_resilient: 'Send 1 personalized networking/referral message on LinkedIn.',
-    scientific_rationale: 'Ensures consistent daily pipeline activity during recruitment cycles.',
+    scientific_rationale: 'Ensures persistent daily action and pipeline volume during competitive recruitment cycles without burnout.',
     createdAt: new Date().toISOString(),
   },
 ];
 
-// Target points: 100 points total (5 non-negotiables x 20 pts)
+// Target points: 7 points daily (1 + 1 + 1 + 1 + 3 = 7 pts total)
 export const DEFAULT_SETTINGS: WinterArcSettings = {
   startDate: new Date().toISOString().split('T')[0],
   endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-  dailyTargetPoints: 100,
-  streakThresholdPercent: 70, // 70% (70 pts) of daily target maintains streak
+  dailyTargetPoints: 7,
+  streakThresholdPercent: 70, // 70% (>= 5 pts) maintains streak
   userName: 'Arc Warrior',
   theme: 'slate',
 };

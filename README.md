@@ -1,29 +1,27 @@
 # Momentum ⚡ • Winter Arc Habit & Points Tracker
 
-> **Momentum** is a sleek, ultra-fast, minimalist 1-tap habit and daily points tracker designed for focus, discipline, and execution during your 90-day Winter Arc. Built with React 19, TypeScript, and Tailwind CSS.
+> **Momentum** is a sleek, ultra-fast, minimalist 1-tap habit and daily points tracker designed for focus, discipline, and execution during your 90-day Winter Arc. Built with React 19, TypeScript, Tailwind CSS, and Capacitor.
 
 ---
 
 ## 🔥 Key Features
 
 - **⚡ 1-Tap Zero-Friction Execution:** Complete habits instantly with native mobile haptic vibration feedback.
-- **🎯 Dynamic Daily Score & Gauge:** Circular radial progress ring that calculates earned points vs target in real-time, complete with milestone confetti celebrations.
-- **🔮 Gemini Notebook Smart Sync:** Import your daily checklists, bullet points, or structured JSON directly from your Gemini notebook. Auto-parses strict rules, resilient fallback floors, categories, and scientific rationales.
-- **🔬 Built-in 11 Science-Backed Winter Arc Protocols:**
-  - `Recovery & Circadian` • Rise < 8:00 AM & 8h Sleep (+15 pts)
-  - `Circadian Shield` • No Phone After 11:00 PM (+10 pts)
-  - `Mindset & Focus` • 5-Min Daily Meditation (+10 pts)
-  - `Environment Reset` • Daily Workspace Clean (+10 pts)
-  - `Physical Hypertrophy` • Gym & Double Progression (+20 pts)
-  - `Nutrition & Bulk` • Macro Surplus & 80g Protein Floor (+20 pts)
-  - `Technical & Academics` • 90-Min Study Sprint (+20 pts)
-  - `Knowledge Base` • 15–30m Tech Reading (+10 pts)
-  - `Career Transition` • Daily Career Points (+15 pts)
-  - `Interview Mastery` • Weekly Mock Interview (+25 pts)
-  - `Weekly Retrospective` • Sunday Reflection & Audit (+20 pts)
+- **🎯 Dynamic Daily Score & Radial Gauge:** Real-time circular progress ring and point calculation with milestone confetti celebrations.
+- **🛡️ The 5 Core Non-Negotiables Protocol Standard:** Pre-loaded with strict execution rules, resilient fallback floors, and biological rationales:
+  - `🦩 Circadian Shield & Sleep Recovery` • 11:00 PM Digital Sunset & 8h Sleep Floor (+1 pt)
+  - `🔥 Physical Hypertrophy & Strength` • 4-Day Gym Split & Double Progression (+1 pt)
+  - `🟩 Nutrition & Fuel` • Clean Bulk & 80g Protein Floor (+1 pt)
+  - `🌊 Technical Skill & Academics` • 90-Min Daily Study Sprint (+1 pt)
+  - `🎯 Career Transition & Pipeline` • Daily Career Points System (+3 pts)
+  - 📖 **Full Protocol Specification:** See [docs/PROTOCOLS.md](docs/PROTOCOLS.md)
+- **🔮 Gemini Notebook Smart Sync:** Import your checklists, bullet points, or structured JSON directly from your Gemini notebook. Auto-parses strict rules, resilient fallback floors, categories, hex colors, and scientific rationales.
+- **🔊 Web Audio Chimes:** Tactile harmonic audio feedback on completions synthesized via the Web Audio API (zero audio file dependencies).
+- **🖥️ Responsive Dual-Mode Layout:** Full desktop dashboard workspace with keyboard shortcuts (`1`-`9`, `J`/`K`, `T`, `N`, `I`, `S`, `D`, `V`, `?`), plus 1-click toggle to mobile smartphone preview frame.
+- **🌙 Dark & Warm Light Themes:** 1-click theme switcher with smooth transitions across all cards, drawers, and modal dialogs.
 - **📖 Memorable Moments & Reflection Journal:** Capture daily highlights, wins, lessons learned, or gym PRs. Includes a continuous **Memory Vault Timeline** for month-end reviews.
-- **📊 1-Click Excel / CSV Export:** Download formatted UTF-8 spreadsheets containing date-by-date habit completions, total points, streak statuses, and daily reflection logs for your archives.
-- **📱 PWA & Mobile Ready:** 100% offline persistence with LocalStorage, optimized mobile viewport, and dark status bar integration.
+- **📊 1-Click Excel / CSV Export:** Download formatted UTF-8 spreadsheets containing date-by-date habit completions, total points, streak statuses, and daily reflection logs.
+- **📱 PWA & Android Native Ready:** 100% offline persistence with LocalStorage, optimized mobile viewport, and Capacitor 8 Android native wrapper.
 
 ---
 
@@ -33,7 +31,8 @@
 - **Mobile Runtime:** Capacitor 8 (Android)
 - **Build Tool:** Vite 8
 - **Styling:** Tailwind CSS 4 + Lucide Icons
-- **Effects:** Canvas-Confetti & Mobile Vibration API
+- **Audio & Haptics:** Web Audio API & Mobile Vibration API
+- **Effects:** Canvas-Confetti
 - **Persistence:** LocalStorage (Offline-First)
 
 ---
