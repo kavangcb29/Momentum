@@ -15,7 +15,7 @@
   - `Mindset & Focus` • 5-Min Daily Meditation (+10 pts)
   - `Environment Reset` • Daily Workspace Clean (+10 pts)
   - `Physical Hypertrophy` • Gym & Double Progression (+20 pts)
-  - `Nutrition & Bulk` • Macro Surplus & 130g Protein Floor (+20 pts)
+  - `Nutrition & Bulk` • Macro Surplus & 80g Protein Floor (+20 pts)
   - `Technical & Academics` • 90-Min Study Sprint (+20 pts)
   - `Knowledge Base` • 15–30m Tech Reading (+10 pts)
   - `Career Transition` • Daily Career Points (+15 pts)

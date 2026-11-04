@@ -1,6 +1,6 @@
 import type { Habit, DayLog, WinterArcSettings } from '../types';
 
-const HABITS_KEY = 'momentum_habits_v3';
+const HABITS_KEY = 'momentum_habits_v4';
 const LOGS_KEY = 'momentum_logs_v1';
 const SETTINGS_KEY = 'momentum_settings_v1';
 
@@ -40,14 +40,14 @@ export const DEFAULT_HABITS: Habit[] = [
   },
   {
     id: 'h3_clean_bulk',
-    name: 'Clean Bulk & 130g Protein Floor',
+    name: 'Clean Bulk & 80g Protein Floor',
     category: 'Nutrition & Bulk',
     points: 20,
     icon: '🟩',
     color: '#A3FFB4',
     frequency: 'daily',
-    strict_rule: 'Hit ~2,600 kcal/day clean surplus and >= 130g protein floor daily across 4 clean whole-food meals.',
-    minimum_resilient: 'Hit 130g protein floor across Meals 1 & 2 even if total calories fluctuate.',
+    strict_rule: 'Hit ~2,600 kcal/day clean surplus and >= 80g protein floor daily across 4 clean whole-food meals.',
+    minimum_resilient: 'Hit 80g protein floor across Meals 1 & 2 even if total calories fluctuate.',
     scientific_rationale: 'Fuels muscle tissue growth and maintains intramuscular glycogen hydration without digestive bloating.',
     createdAt: new Date().toISOString(),
   },

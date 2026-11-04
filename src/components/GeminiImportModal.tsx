@@ -21,7 +21,7 @@ const SAMPLE_NOTEBOOK_TEXT = `Winter Arc November Protocols:
 - [ ] Hypertrophy & Progressive Overload (20 pts)
   - Strict: 4 sets per exercise targeting RPE 8-9
   - Resilient: 15-minute bodyweight mobility session
-- [ ] Clean Surplus & 130g Protein Floor (20 pts)
+- [ ] Clean Surplus & 80g Protein Floor (20 pts)
 - [ ] 10-Min Evening Meditation & Box Breathing (10 pts)
 - [ ] No Social Media / Phone Before 11 AM (15 pts)`;
 
