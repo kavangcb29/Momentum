@@ -4,6 +4,7 @@ export interface Habit {
   category: string;
   points: number;
   icon?: string;
+  color?: string;
   frequency?: 'daily' | 'weekly' | '4_times_per_week' | string;
   scheduled_days?: string[]; // e.g. ["Mon", "Tue", "Thu", "Fri"]
   strict_rule?: string;

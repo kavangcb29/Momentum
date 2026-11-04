@@ -145,7 +145,10 @@ export const ChallengesList: React.FC<ChallengesListProps> = ({
                   className="p-4 flex items-center justify-between cursor-pointer select-none"
                 >
                   <div className="flex items-center gap-3 min-w-0 pr-2">
-                    <div className="w-10 h-10 rounded-2xl bg-stone-100 dark:bg-stone-800 border border-stone-200/80 dark:border-stone-700 flex items-center justify-center text-lg flex-shrink-0">
+                    <div
+                      className="w-10 h-10 rounded-2xl bg-stone-100 dark:bg-stone-800 border border-stone-200/80 dark:border-stone-700 flex items-center justify-center text-lg flex-shrink-0"
+                      style={habit.color ? { backgroundColor: `${habit.color}25`, borderColor: `${habit.color}70` } : undefined}
+                    >
                       {habit.icon || '⚡'}
                     </div>
 
@@ -200,7 +203,7 @@ export const ChallengesList: React.FC<ChallengesListProps> = ({
                           <Sparkles className="w-3.5 h-3.5 text-amber-500" />
                           <span>Strict Execution Protocol</span>
                         </div>
-                        <p className="text-stone-600 dark:text-stone-400 leading-relaxed">{habit.strict_rule}</p>
+                        <p className="text-stone-600 dark:text-stone-400 leading-relaxed whitespace-pre-line">{habit.strict_rule}</p>
                       </div>
                     )}
 

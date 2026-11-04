@@ -1,152 +1,96 @@
 import type { Habit, DayLog, WinterArcSettings } from '../types';
 
-const HABITS_KEY = 'momentum_habits_v2';
+const HABITS_KEY = 'momentum_habits_v3';
 const LOGS_KEY = 'momentum_logs_v1';
 const SETTINGS_KEY = 'momentum_settings_v1';
 
 export const DEFAULT_HABITS: Habit[] = [
   {
-    id: 'h1_sleep',
-    name: 'Rise < 8:00 AM & 8h Sleep',
+    id: 'h1_digital_sunset',
+    name: '11:00 PM Digital Sunset & 8-Hour Sleep Floor',
     category: 'Recovery & Circadian',
-    points: 15,
-    icon: '🌅',
+    points: 20,
+    icon: '🦩',
+    color: '#FF99C8',
     frequency: 'daily',
-    strict_rule: 'Sleep >= 8.0 hours and wake up before 8:00 AM without pressing snooze.',
-    minimum_resilient: 'Consistent bedtime alarm set even if sleep duration is slightly shortened.',
+    strict_rule: 'Screens off strictly at 11:00 PM. Sleep >= 8.0 hours nightly and wake up before 8:00 AM without snooze.',
+    minimum_resilient: 'Bedtime alarm set for 11:15 PM even if total sleep duration is slightly shortened.',
     scientific_rationale: 'Protects REM and deep sleep architecture necessary for muscle protein synthesis and memory consolidation.',
     createdAt: new Date().toISOString(),
   },
   {
-    id: 'h2_nophone',
-    name: 'No Phone After 11:00 PM',
-    category: 'Circadian Shield',
-    points: 10,
-    icon: '📵',
-    frequency: 'daily',
-    strict_rule: "Turn off all mobile screens and put phone out of arm's reach strictly by 11:00 PM.",
-    minimum_resilient: 'Phone placed across the room by 11:00 PM even if reading paper books in bed.',
-    scientific_rationale: 'Prevents blue light screen exposure from suppressing melatonin secretion.',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 'h3_meditate',
-    name: '5-Min Daily Meditation',
-    category: 'Mindset & Focus',
-    points: 10,
-    icon: '🧘',
-    frequency: 'daily',
-    strict_rule: 'Complete 5 minutes of uninterrupted morning breathwork or mindfulness.',
-    minimum_resilient: '1 minute of deep box-breathing (4s in, 4s hold, 4s out, 4s hold).',
-    scientific_rationale: 'Calms sympathetic nervous system arousal and builds attentional control for study blocks.',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 'h4_clean',
-    name: 'Daily Environment Clean',
-    category: 'Environment Reset',
-    points: 10,
-    icon: '🧹',
-    frequency: 'daily',
-    strict_rule: 'Spend 10-15 minutes tidying workspace, clearing desk, and resetting environment.',
-    minimum_resilient: 'Clear desk surface completely before closing workspace for the night.',
-    scientific_rationale: 'Eliminates visual clutter to reduce baseline cognitive overhead.',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 'h5_gym',
-    name: 'Gym & Double Progression',
+    id: 'h2_gym_split',
+    name: '4-Day Gym Split + Double Progression',
     category: 'Physical Hypertrophy',
     points: 20,
-    icon: '🏋️',
+    icon: '🔥',
+    color: '#FF9233',
     frequency: '4_times_per_week',
     scheduled_days: ['Mon', 'Tue', 'Thu', 'Fri'],
-    strict_rule: 'Train 4-day Upper/Lower split with 4 sets per exercise. Hold weight static until top rep limit is hit across ALL 4 sets before adding load.',
+    strict_rule: `Train 4x/week (Mon, Tue, Thu, Fri) on an Upper/Lower split with 4 sets per exercise. Hold weight static across all 4 sets until hitting 12 clean reps on EVERY set before raising load (+2.5–5 lbs).
+• Mon: Upper A (Bench Press, Incline DB Press, Overhead Press, Dips)
+• Tue: Lower A (Squats, RDLs, Leg Press, Calf Raises)
+• Wed: Active Recovery (10,000 steps + mobility stretching)
+• Thu: Upper B (Lat Pulldowns, Bent Rows, Lateral Raises, Bicep Curls)
+• Fri: Lower B (Bulgarian Split Squats, Hamstring Curls, Lunges, Abs)
+• Sat & Sun: Active Recovery / Rest`,
     minimum_resilient: '10-minute bodyweight circuit or active mobility flow.',
     scientific_rationale: 'Drives mechanical tension and myofibrillar hypertrophy while allowing central nervous system recovery.',
     createdAt: new Date().toISOString(),
   },
   {
-    id: 'h6_diet',
-    name: 'Macro & Diet Auto-Sync',
+    id: 'h3_clean_bulk',
+    name: 'Clean Bulk & 130g Protein Floor',
     category: 'Nutrition & Bulk',
     points: 20,
-    icon: '🥗',
+    icon: '🟩',
+    color: '#A3FFB4',
     frequency: 'daily',
-    strict_rule: 'Hit 2,516–2,600 kcal/day clean surplus and >= 130g protein floor.',
-    minimum_resilient: 'Hit protein floor (130g) at breakfast/lunch even if calorie totals fluctuate.',
+    strict_rule: 'Hit ~2,600 kcal/day clean surplus and >= 130g protein floor daily across 4 clean whole-food meals.',
+    minimum_resilient: 'Hit 130g protein floor across Meals 1 & 2 even if total calories fluctuate.',
     scientific_rationale: 'Fuels muscle tissue growth and maintains intramuscular glycogen hydration without digestive bloating.',
     createdAt: new Date().toISOString(),
   },
   {
-    id: 'h7_study',
-    name: '90-Min Daily Study Sprint',
+    id: 'h4_study_sprint',
+    name: '90-Minute Daily Study Sprint',
     category: 'Technical & Academics',
     points: 20,
-    icon: '💻',
+    icon: '🌊',
+    color: '#90E0EF',
     frequency: 'daily',
-    strict_rule: 'Execute 90 minutes of deep work: coursework, SQL window functions, or BA portfolio projects.',
-    minimum_resilient: '15 minutes reviewing lecture notes, syllabus, or SQL syntax.',
-    scientific_rationale: 'Compounds technical career capital through daily focused deliberate practice.',
+    strict_rule: `Execute 90 minutes of deep work daily, split into three 30-minute blocks:
+• 30m SQL: Practice window functions (PARTITION BY, LAG, LEAD, DENSE_RANK)
+• 30m BA Portfolio: Process maps (Lucidchart), BRD user stories, or Power BI
+• 30m Coursework: CS assignments, lecture prep, or exam review`,
+    minimum_resilient: '15 minutes reviewing SQL query syntax or lecture slides.',
+    scientific_rationale: 'Compounds technical career capital through daily deliberate practice.',
     createdAt: new Date().toISOString(),
   },
   {
-    id: 'h8_reading',
-    name: '15–30m Tech Reading',
-    category: 'Knowledge Base',
-    points: 10,
-    icon: '📖',
-    frequency: 'daily',
-    strict_rule: 'Read 15-30 minutes of PM teardowns, BA case studies, or systems architecture.',
-    minimum_resilient: 'Read exactly 1 page of technical or self-growth material.',
-    scientific_rationale: 'Trains linear attention models to combat short-form digital media fragmentation.',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 'h9_career',
-    name: 'Daily Career Points (3 Pts)',
+    id: 'h5_career_points',
+    name: 'Daily Career Points System (3 Pts — Strict Model A)',
     category: 'Career Transition',
-    points: 15,
+    points: 20,
     icon: '🎯',
+    color: '#FF70A6',
     frequency: 'daily',
-    strict_rule: 'Earn >= 3 Career Points daily (1 Tailored App = 2pts, Outreach = 1pt, Quick App = 1pt). NO ROLL-OVERS / NO BANKING.',
+    strict_rule: `Earn >= 3 Career Points every single day. Points reset to 0 at midnight. NO BANKING / NO ROLL-OVERS.
+• 1 Tailored Application (Customized Resume/Cover) = 2 Points
+• 1 Networking / Referral LinkedIn Message = 1 Point
+• 1 Quick-Apply Application = 1 Point`,
     minimum_resilient: 'Send 1 personalized networking/referral message on LinkedIn.',
     scientific_rationale: 'Ensures consistent daily pipeline activity during recruitment cycles.',
     createdAt: new Date().toISOString(),
   },
-  {
-    id: 'h10_mock',
-    name: 'Weekly Mock Interview',
-    category: 'Interview Mastery',
-    points: 25,
-    icon: '🎙️',
-    frequency: 'weekly',
-    strict_rule: 'Complete 1-2 mock interviews weekly practicing CIRCLES framework or SQL case studies.',
-    minimum_resilient: 'Verbally outline 1 CIRCLES product framework question out loud.',
-    scientific_rationale: 'Builds verbal fluency under clock pressure for case interviews.',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 'h11_audit',
-    name: 'Sunday Reflection & Audit',
-    category: 'Weekly Retrospective',
-    points: 20,
-    icon: '📊',
-    frequency: 'weekly',
-    scheduled_days: ['Sun'],
-    strict_rule: 'Conduct 10-minute Sunday audit of logs, set/rep progression sheets, and upcoming strategy.',
-    minimum_resilient: 'Write a 1-sentence summary of weekly performance.',
-    scientific_rationale: 'Decouples subjective emotion from objective performance data.',
-    createdAt: new Date().toISOString(),
-  },
 ];
 
-// Calculate target points from default habits that are active today
+// Target points: 100 points total (5 non-negotiables x 20 pts)
 export const DEFAULT_SETTINGS: WinterArcSettings = {
   startDate: new Date().toISOString().split('T')[0],
   endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-  dailyTargetPoints: 120,
-  streakThresholdPercent: 70, // 70% of daily target completes a streak day
+  dailyTargetPoints: 100,
+  streakThresholdPercent: 70, // 70% (70 pts) of daily target maintains streak
   userName: 'Arc Warrior',
   theme: 'slate',
 };

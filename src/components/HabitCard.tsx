@@ -77,6 +77,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({
                 ? 'bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800'
                 : 'bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700'
             }`}
+            style={!isDone && habit.color ? { backgroundColor: `${habit.color}25`, borderColor: `${habit.color}70` } : undefined}
           >
             {habit.icon || '⚡'}
           </div>
@@ -172,7 +173,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({
                 <Sparkles className="w-3.5 h-3.5 text-amber-500" />
                 <span>Strict Execution Protocol</span>
               </div>
-              <p className="text-stone-600 dark:text-stone-400 leading-relaxed">{habit.strict_rule}</p>
+              <p className="text-stone-600 dark:text-stone-400 leading-relaxed whitespace-pre-line">{habit.strict_rule}</p>
             </div>
           )}
 
