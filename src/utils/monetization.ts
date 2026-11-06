@@ -3,47 +3,140 @@ import {
   AdMob,
   BannerAdSize,
   BannerAdPosition,
+  BannerAdPluginEvents,
+  InterstitialAdPluginEvents,
+  RewardAdPluginEvents,
   type BannerAdOptions,
   type AdOptions,
   type RewardAdOptions,
   type AdMobRewardItem,
 } from '@capacitor-community/admob';
 
-// Google Official Test Ad Unit IDs (Used for safe development & testing)
+// Google Official Test Ad Unit IDs (Google Sample IDs)
 export const AD_UNIT_IDS = {
   BANNER: 'ca-app-pub-3940256099942544/6300978111',
   INTERSTITIAL: 'ca-app-pub-3940256099942544/1033173712',
   REWARDED: 'ca-app-pub-3940256099942544/5224354917',
 };
 
+export interface AdStatusState {
+  isNative: boolean;
+  isInitialized: boolean;
+  bannerLoaded: boolean;
+  lastError: string | null;
+  mode: 'test' | 'live' | 'simulation';
+}
+
 class MonetizationManager {
   private isInitialized = false;
+  private isInitializing = false;
   private isBannerShowing = false;
+  private nativeBannerLoaded = false;
+  private lastErrorMessage: string | null = null;
 
   public async initialize(): Promise<void> {
+    await this.ensureInitialized();
+  }
+
+  public async ensureInitialized(): Promise<void> {
     if (this.isInitialized) return;
+    if (this.isInitializing) return;
+
+    this.isInitializing = true;
 
     if (Capacitor.isNativePlatform()) {
       try {
+        const useLive = localStorage.getItem('momentum_use_live_ads') === 'true';
         await AdMob.initialize({
-          testingDevices: ['EMULATOR'],
-          initializeForTesting: true,
+          initializeForTesting: !useLive,
         });
         this.isInitialized = true;
-        console.log('[Monetization] Google AdMob SDK initialized on Android native');
-      } catch (err) {
-        console.warn('[Monetization] Native initialization deferred:', err);
+        this.setupListeners();
+        console.log('[Monetization] Google AdMob SDK initialized successfully on Android native');
+      } catch (err: unknown) {
+        const errMsg = err instanceof Error ? err.message : String(err);
+        this.lastErrorMessage = errMsg;
+        console.warn('[Monetization] Native initialization warning:', errMsg);
+        this.isInitialized = true; // allow fallback
+      } finally {
+        this.isInitializing = false;
       }
     } else {
-      console.log('[Monetization] Browser environment detected - preview simulation enabled');
       this.isInitialized = true;
+      this.isInitializing = false;
+      console.log('[Monetization] Browser environment active - Live Sponsor & Simulation enabled');
     }
   }
 
-  // Check if ads should be displayed (returns false if creator enabled Ad-Free VIP mode)
+  private setupListeners(): void {
+    if (!Capacitor.isNativePlatform()) return;
+
+    try {
+      AdMob.addListener(BannerAdPluginEvents.Loaded, () => {
+        console.log('[Monetization Event] Native Banner loaded successfully');
+        this.nativeBannerLoaded = true;
+        this.lastErrorMessage = null;
+        window.dispatchEvent(new CustomEvent('momentum_native_banner_loaded'));
+      });
+
+      AdMob.addListener(BannerAdPluginEvents.FailedToLoad, (err: unknown) => {
+        const msg = JSON.stringify(err);
+        console.warn('[Monetization Event] Native Banner failed to load (No fill or network):', msg);
+        this.nativeBannerLoaded = false;
+        this.lastErrorMessage = msg;
+        window.dispatchEvent(new CustomEvent('momentum_native_banner_failed', { detail: msg }));
+      });
+
+      AdMob.addListener(InterstitialAdPluginEvents.Loaded, () => {
+        console.log('[Monetization Event] Native Interstitial loaded');
+      });
+
+      AdMob.addListener(InterstitialAdPluginEvents.FailedToLoad, (err: unknown) => {
+        console.warn('[Monetization Event] Native Interstitial failed:', err);
+      });
+
+      AdMob.addListener(RewardAdPluginEvents.Loaded, () => {
+        console.log('[Monetization Event] Native Rewarded Video loaded');
+      });
+
+      AdMob.addListener(RewardAdPluginEvents.FailedToLoad, (err: unknown) => {
+        console.warn('[Monetization Event] Native Rewarded Video failed:', err);
+      });
+    } catch (e) {
+      console.warn('[Monetization] Could not attach listeners:', e);
+    }
+  }
+
+  // Check if ads should be displayed (returns false if developer enabled VIP Ad-Free mode)
   public areAdsEnabled(): boolean {
     const devBypass = localStorage.getItem('momentum_dev_disable_ads') === 'true';
     return !devBypass;
+  }
+
+  // Get active Ad Unit IDs (allowing custom live IDs from localStorage)
+  public getActiveIds() {
+    const useLive = localStorage.getItem('momentum_use_live_ads') === 'true';
+    const customBanner = localStorage.getItem('momentum_custom_banner_id');
+    const customInterstitial = localStorage.getItem('momentum_custom_interstitial_id');
+    const customRewarded = localStorage.getItem('momentum_custom_rewarded_id');
+
+    return {
+      isLive: useLive,
+      BANNER: useLive && customBanner ? customBanner.trim() : AD_UNIT_IDS.BANNER,
+      INTERSTITIAL: useLive && customInterstitial ? customInterstitial.trim() : AD_UNIT_IDS.INTERSTITIAL,
+      REWARDED: useLive && customRewarded ? customRewarded.trim() : AD_UNIT_IDS.REWARDED,
+    };
+  }
+
+  public getStatus(): AdStatusState {
+    const active = this.getActiveIds();
+    return {
+      isNative: Capacitor.isNativePlatform(),
+      isInitialized: this.isInitialized,
+      bannerLoaded: this.nativeBannerLoaded,
+      lastError: this.lastErrorMessage,
+      mode: !Capacitor.isNativePlatform() ? 'simulation' : active.isLive ? 'live' : 'test',
+    };
   }
 
   // 1. Bottom Banner Ad
@@ -55,19 +148,27 @@ class MonetizationManager {
 
     if (this.isBannerShowing) return;
 
+    await this.ensureInitialized();
+
+    const ids = this.getActiveIds();
+
     if (Capacitor.isNativePlatform()) {
       try {
         const options: BannerAdOptions = {
-          adId: AD_UNIT_IDS.BANNER,
+          adId: ids.BANNER,
           adSize: BannerAdSize.BANNER,
           position: BannerAdPosition.BOTTOM_CENTER,
           margin: 0,
-          isTesting: true,
+          isTesting: !ids.isLive,
         };
         await AdMob.showBanner(options);
         this.isBannerShowing = true;
-      } catch (err) {
-        console.warn('[Monetization] Native banner failed:', err);
+      } catch (err: unknown) {
+        const errMsg = err instanceof Error ? err.message : String(err);
+        this.lastErrorMessage = errMsg;
+        console.warn('[Monetization] Native banner call failed:', errMsg);
+        // Dispatch fallback event so in-app live rotating sponsor banner renders instead
+        window.dispatchEvent(new CustomEvent('momentum_sponsor_banner_show'));
       }
     } else {
       this.isBannerShowing = true;
@@ -80,84 +181,93 @@ class MonetizationManager {
       try {
         await AdMob.hideBanner();
         this.isBannerShowing = false;
+        this.nativeBannerLoaded = false;
       } catch (err) {
-        console.warn('[Monetization] Hide banner failed:', err);
+        console.warn('[Monetization] Hide banner error:', err);
       }
-    } else {
-      this.isBannerShowing = false;
-      window.dispatchEvent(new CustomEvent('momentum_sponsor_banner_hide'));
     }
+    this.isBannerShowing = false;
+    window.dispatchEvent(new CustomEvent('momentum_sponsor_banner_hide'));
   }
 
   // 2. Interstitial Full-Screen Ad
   public async showInterstitial(): Promise<boolean> {
     if (!this.areAdsEnabled()) {
-      console.log('[Monetization] Interstitial skipped - Creator VIP Ad-Free active');
+      console.log('[Monetization] Interstitial skipped - Creator VIP active');
       return false;
     }
+
+    await this.ensureInitialized();
+    const ids = this.getActiveIds();
 
     if (Capacitor.isNativePlatform()) {
       try {
         const options: AdOptions = {
-          adId: AD_UNIT_IDS.INTERSTITIAL,
-          isTesting: true,
+          adId: ids.INTERSTITIAL,
+          isTesting: !ids.isLive,
         };
         await AdMob.prepareInterstitial(options);
         await AdMob.showInterstitial();
         return true;
       } catch (err) {
-        console.warn('[Monetization] Native interstitial error:', err);
-        return false;
+        console.warn('[Monetization] Native interstitial failed, falling back to in-app sponsor modal:', err);
+        this.triggerInAppInterstitial();
+        return true;
       }
     } else {
-      console.log('[Monetization] Launching simulated interstitial modal');
-      window.dispatchEvent(
-        new CustomEvent('momentum_sponsor_interstitial_show', {
-          detail: {
-            title: 'Goal Achieved! • Milestone Sponsor',
-            message: 'In the compiled Android APK, this displays a full-screen Google AdMob interstitial ad.',
-          },
-        })
-      );
+      this.triggerInAppInterstitial();
       return true;
     }
   }
 
-  // 3. Rewarded Video Ad (Watch to earn Streak Shield / Freeze)
+  private triggerInAppInterstitial(): void {
+    window.dispatchEvent(
+      new CustomEvent('momentum_sponsor_interstitial_show', {
+        detail: {
+          title: 'Daily Goal Complete! • Partner Showcase',
+          message: 'Fuel your Winter Arc with elite recovery, nutrition, and discipline tools.',
+        },
+      })
+    );
+  }
+
+  // 3. Rewarded Video Ad (Watch to earn Streak Shield)
   public async showRewarded(): Promise<AdMobRewardItem | null> {
     if (!this.areAdsEnabled()) {
       console.log('[Monetization] Rewarded ad bypassed for Creator');
       return { type: 'streak_shield', amount: 1 };
     }
 
+    await this.ensureInitialized();
+    const ids = this.getActiveIds();
+
     if (Capacitor.isNativePlatform()) {
       try {
         const options: RewardAdOptions = {
-          adId: AD_UNIT_IDS.REWARDED,
-          isTesting: true,
+          adId: ids.REWARDED,
+          isTesting: !ids.isLive,
         };
         await AdMob.prepareRewardVideoAd(options);
         const reward = await AdMob.showRewardVideoAd();
-        return reward;
+        if (reward) return reward;
       } catch (err) {
-        console.warn('[Monetization] Native rewarded video failed:', err);
-        return null;
+        console.warn('[Monetization] Native rewarded video failed or unfilled. Falling back to live sponsor video:', err);
       }
-    } else {
-      console.log('[Monetization] Launching simulated rewarded video');
-      return new Promise((resolve) => {
-        window.dispatchEvent(
-          new CustomEvent('momentum_sponsor_rewarded_show', {
-            detail: {
-              title: 'Sponsored Reward • Streak Shield',
-              message: 'Watch this 5-second simulated video to earn a Streak Freeze Shield!',
-              onComplete: () => resolve({ type: 'streak_shield', amount: 1 }),
-              onCancel: () => resolve(null),
-            },
-          })
-        );
-      });
     }
+
+    // Interactive fallback video ad modal
+    return new Promise((resolve) => {
+      window.dispatchEvent(
+        new CustomEvent('momentum_sponsor_rewarded_show', {
+          detail: {
+            title: 'Partner Showcase • Streak Freeze Shield',
+            message: 'Watch this sponsored showcase to earn +1 Streak Freeze Shield!',
+            onComplete: () => resolve({ type: 'streak_shield', amount: 1 }),
+            onCancel: () => resolve(null),
+          },
+        })
+      );
+    });
   }
 }
 
