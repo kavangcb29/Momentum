@@ -91,7 +91,12 @@ export const Header: React.FC<HeaderProps> = ({
   ];
 
   return (
-    <header className="sticky top-0 z-30 bg-[#F9F8F5]/90 dark:bg-stone-900/90 backdrop-blur-md border-b border-stone-200/80 dark:border-stone-800 px-4 pt-3 pb-2 transition-colors">
+    <header
+      style={{
+        paddingTop: 'max(calc(env(safe-area-inset-top, 0px) + 12px), 18px)',
+      }}
+      className="sticky top-0 z-30 bg-[#F9F8F5]/90 dark:bg-stone-900/90 backdrop-blur-md border-b border-stone-200/80 dark:border-stone-800 px-4 pb-2.5 transition-colors"
+    >
       <div className={`mx-auto transition-all duration-300 ${layoutMode === 'dashboard' ? 'max-w-5xl' : 'max-w-md'}`}>
         {/* Top row: logo, date, actions */}
         <div className="flex items-center justify-between mb-3 gap-2">

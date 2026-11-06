@@ -46,7 +46,12 @@ export const PartnerBanner: React.FC = () => {
   if (!isVisible || Capacitor.isNativePlatform()) return null;
 
   return (
-    <div className="w-full max-w-[440px] mx-auto pt-2 pb-1 px-3">
+    <div
+      className="w-full max-w-[440px] mx-auto pt-2 px-3"
+      style={{
+        paddingBottom: 'max(calc(env(safe-area-inset-bottom, 0px) + 8px), 12px)',
+      }}
+    >
       <div className="relative bg-gradient-to-r from-stone-100 via-stone-50 to-stone-100 dark:from-stone-800/90 dark:via-stone-850 dark:to-stone-800/90 border border-stone-200 dark:border-stone-700/80 rounded-2xl p-2.5 flex items-center justify-between shadow-xs text-xs">
         <div className="flex items-center gap-2">
           <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30">

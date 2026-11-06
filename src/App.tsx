@@ -409,7 +409,10 @@ export function App() {
       <div
         className={`w-full ${
           isFullDashboard ? 'max-w-5xl' : 'max-w-[430px]'
-        } bg-[#F9F8F5] dark:bg-stone-900 min-h-screen sm:min-h-[890px] sm:rounded-[48px] sm:shadow-2xl overflow-hidden flex flex-col justify-between border border-stone-200/50 dark:border-stone-800 pb-2 transition-all duration-300`}
+        } bg-[#F9F8F5] dark:bg-stone-900 min-h-screen sm:min-h-[890px] sm:rounded-[48px] sm:shadow-2xl overflow-hidden flex flex-col justify-between border border-stone-200/50 dark:border-stone-800 transition-all duration-300`}
+        style={{
+          paddingBottom: 'max(calc(env(safe-area-inset-bottom, 0px) + 12px), 16px)',
+        }}
       >
         {/* Top Header */}
         <Header
@@ -432,7 +435,7 @@ export function App() {
         />
 
         {/* Main Body per Active Tab */}
-        <main className="w-full px-4 sm:px-6 flex-1 space-y-4 pt-3 overflow-y-auto">
+        <main className="w-full px-4 sm:px-6 flex-1 space-y-4 pt-4 pb-16 overflow-y-auto">
           {activeTab === 'daily' && (
             <div className="space-y-4 tab-content-enter">
               {/* Date Switcher Bar */}
