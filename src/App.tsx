@@ -51,7 +51,12 @@ export function App() {
 
   // Theme & Sound & Layout states
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
-    return localStorage.getItem('momentum_dark_mode') === 'true';
+    const saved = localStorage.getItem('momentum_dark_mode');
+    if (saved !== null) return saved === 'true';
+    if (typeof window !== 'undefined') {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
   });
   const [isMuted, setIsMuted] = useState<boolean>(() => soundManager.isSoundMuted());
   const [layoutMode, setLayoutMode] = useState<'mobile' | 'dashboard'>(() => {
@@ -77,9 +82,19 @@ export function App() {
     monetizationManager.initialize();
   }, []);
 
-  // Sync dark mode class on document
+  // Sync dark mode class on document and body
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', isDarkMode);
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      document.body.classList.add('dark');
+      const metaTheme = document.querySelector('meta[name="theme-color"]');
+      if (metaTheme) metaTheme.setAttribute('content', '#0c0a09');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.body.classList.remove('dark');
+      const metaTheme = document.querySelector('meta[name="theme-color"]');
+      if (metaTheme) metaTheme.setAttribute('content', '#F9F8F5');
+    }
     localStorage.setItem('momentum_dark_mode', String(isDarkMode));
   }, [isDarkMode]);
 
