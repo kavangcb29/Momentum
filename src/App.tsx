@@ -21,10 +21,11 @@ import { MemorableMomentCard } from './components/MemorableMomentCard';
 import { ArcCountdownCard } from './components/ArcCountdownCard';
 import { KeyboardShortcutsModal } from './components/KeyboardShortcutsModal';
 import { DeveloperModal } from './components/DeveloperModal';
-import { AdMobBanner } from './components/AdMobBanner';
-import { AdMobSimulationModal } from './components/AdMobSimulationModal';
+import { PartnerBanner } from './components/PartnerBanner';
+import { PartnerAdModal } from './components/PartnerAdModal';
+import { SponsoredRewardCard } from './components/SponsoredRewardCard';
 import { soundManager } from './utils/audio';
-import { adMobManager } from './utils/admob';
+import { monetizationManager } from './utils/monetization';
 import {
   Sparkles,
   ArrowLeft,
@@ -68,12 +69,12 @@ export function App() {
 
   const prevCompletedPointsRef = useRef<number>(0);
 
-  // Initialize data and AdMob
+  // Initialize data and Monetization
   useEffect(() => {
     setHabits(getHabits());
     setLogs(getLogs());
     setSettings(getSettings());
-    adMobManager.initialize();
+    monetizationManager.initialize();
   }, []);
 
   // Sync dark mode class on document
@@ -100,9 +101,9 @@ export function App() {
     const currentPts = currentLog.totalPoints;
     const target = settings.dailyTargetPoints;
     if (currentPts >= target && target > 0 && prevCompletedPointsRef.current < target) {
-      // Trigger AdMob Interstitial Ad (automatically bypassed if developer mode active)
+      // Trigger Interstitial Ad (automatically bypassed if developer mode active)
       setTimeout(() => {
-        adMobManager.showInterstitial();
+        monetizationManager.showInterstitial();
       }, 1200);
     }
     prevCompletedPointsRef.current = currentPts;
@@ -136,8 +137,8 @@ export function App() {
     const nextRestState = !currentLog.isRestDay;
 
     // If activating rest day and ads are enabled, trigger Rewarded Video Ad
-    if (nextRestState && adMobManager.areAdsEnabled()) {
-      const reward = await adMobManager.showRewarded();
+    if (nextRestState && monetizationManager.areAdsEnabled()) {
+      const reward = await monetizationManager.showRewarded();
       if (!reward) return; // User skipped rewarded video
     }
 
@@ -653,6 +654,9 @@ export function App() {
                     onToggleRestDay={handleToggleRestDay}
                   />
 
+                  {/* Dedicated Sponsored Partner & Streak Shield Card (Placed apart) */}
+                  <SponsoredRewardCard />
+
                   {/* Share Streak Button */}
                   <div className="pt-1">
                     <button
@@ -698,8 +702,8 @@ export function App() {
           )}
         </main>
 
-        {/* AdMob Banner Slot */}
-        <AdMobBanner />
+        {/* Sponsor Banner Slot */}
+        <PartnerBanner />
 
         {/* Modals */}
         <GeminiImportModal
@@ -726,7 +730,7 @@ export function App() {
           onUpdateData={handleUpdateData}
         />
 
-        <AdMobSimulationModal />
+        <PartnerAdModal />
       </div>
     </div>
   );
