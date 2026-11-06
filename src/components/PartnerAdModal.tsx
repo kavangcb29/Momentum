@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Award, Sparkles, X, ExternalLink } from 'lucide-react';
-import { LIVE_SPONSOR_ADS } from './PartnerBanner';
+import { LIVE_SPONSOR_ADS } from '../constants/sponsors';
 
 interface AdState {
   type: 'interstitial' | 'rewarded';

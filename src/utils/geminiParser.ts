@@ -74,9 +74,9 @@ export function parseGeminiNotebookPayload(rawText: string): ParseResult {
     if (!trimmedLine || trimmedLine === '---') continue;
 
     // Check if line is a Header Habit (e.g. `### 1. 🦩 11:00 PM Digital Sunset & 8-Hour Sleep Floor`)
-    const headerMatch = trimmedLine.match(/^#{1,4}\s+(?:\d+[\.\)]\s*)?(.*)/);
+    const headerMatch = trimmedLine.match(/^#{1,4}\s+(?:\d+[.)]\s*)?(.*)/);
     // Check if line is a standard checklist habit (e.g. `- [ ] 1. 🦩 ...`)
-    const checklistMatch = trimmedLine.match(/^[-*•]\s*(?:\[[ xX]\]\s*)?(?:\d+[\.\)]\s*)?(.*)/);
+    const checklistMatch = trimmedLine.match(/^[-*•]\s*(?:\[[ xX]\]\s*)?(?:\d+[.)]\s*)?(.*)/);
 
     const isSubBullet =
       rawLine.startsWith('  ') ||
