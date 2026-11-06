@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   getHabits,
   saveHabits,
@@ -20,7 +20,11 @@ import { ChallengesList } from './components/ChallengesList';
 import { MemorableMomentCard } from './components/MemorableMomentCard';
 import { ArcCountdownCard } from './components/ArcCountdownCard';
 import { KeyboardShortcutsModal } from './components/KeyboardShortcutsModal';
+import { DeveloperModal } from './components/DeveloperModal';
+import { AdMobBanner } from './components/AdMobBanner';
+import { AdMobSimulationModal } from './components/AdMobSimulationModal';
 import { soundManager } from './utils/audio';
+import { adMobManager } from './utils/admob';
 import {
   Sparkles,
   ArrowLeft,
@@ -59,13 +63,17 @@ export function App() {
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+  const [isDevModalOpen, setIsDevModalOpen] = useState(false);
   const [copiedShare, setCopiedShare] = useState(false);
 
-  // Initialize data
+  const prevCompletedPointsRef = useRef<number>(0);
+
+  // Initialize data and AdMob
   useEffect(() => {
     setHabits(getHabits());
     setLogs(getLogs());
     setSettings(getSettings());
+    adMobManager.initialize();
   }, []);
 
   // Sync dark mode class on document
@@ -86,6 +94,19 @@ export function App() {
 
   // Streak
   const streak = calculateStreak(logs, settings.dailyTargetPoints, settings.streakThresholdPercent);
+
+  // Check for goal completion to trigger interstitial ad
+  useEffect(() => {
+    const currentPts = currentLog.totalPoints;
+    const target = settings.dailyTargetPoints;
+    if (currentPts >= target && target > 0 && prevCompletedPointsRef.current < target) {
+      // Trigger AdMob Interstitial Ad (automatically bypassed if developer mode active)
+      setTimeout(() => {
+        adMobManager.showInterstitial();
+      }, 1200);
+    }
+    prevCompletedPointsRef.current = currentPts;
+  }, [currentLog.totalPoints, settings.dailyTargetPoints]);
 
   // Toggle habit for selected date
   const handleToggleHabit = useCallback((habitId: string) => {
@@ -110,9 +131,16 @@ export function App() {
     saveDayLog(updatedLog);
   }, [currentLog, habits, logs, selectedDate]);
 
-  // Toggle Rest Day for selected date
-  const handleToggleRestDay = () => {
+  // Toggle Rest Day with Rewarded Ad option
+  const handleToggleRestDay = async () => {
     const nextRestState = !currentLog.isRestDay;
+
+    // If activating rest day and ads are enabled, trigger Rewarded Video Ad
+    if (nextRestState && adMobManager.areAdsEnabled()) {
+      const reward = await adMobManager.showRewarded();
+      if (!reward) return; // User skipped rewarded video
+    }
+
     const updatedLog: DayLog = {
       ...currentLog,
       isRestDay: nextRestState,
@@ -204,6 +232,13 @@ export function App() {
     });
   }, []);
 
+  // Update Data callback for Developer Console
+  const handleUpdateData = (newHabits: Habit[], newLogs: Record<string, DayLog>, newSettings: WinterArcSettings) => {
+    setHabits(newHabits);
+    setLogs(newLogs);
+    setSettings(newSettings);
+  };
+
   // Categories list for filters
   const categories = useMemo(() => {
     return ['All', ...Array.from(new Set(habits.map((h) => h.category)))];
@@ -224,6 +259,13 @@ export function App() {
   // Global Keyboard Shortcuts handler
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Secret Developer Console trigger: Ctrl + Shift + D
+      if (e.ctrlKey && e.shiftKey && (e.key === 'D' || e.key === 'd')) {
+        e.preventDefault();
+        setIsDevModalOpen((prev) => !prev);
+        return;
+      }
+
       // Don't intercept when user is typing in form inputs or modals
       const targetTag = (e.target as HTMLElement)?.tagName?.toLowerCase();
       if (targetTag === 'input' || targetTag === 'textarea' || targetTag === 'select') {
@@ -235,6 +277,7 @@ export function App() {
         setIsImportOpen(false);
         setIsAddOpen(false);
         setIsShortcutsOpen(false);
+        setIsDevModalOpen(false);
         return;
       }
 
@@ -365,7 +408,7 @@ export function App() {
       <div
         className={`w-full ${
           isFullDashboard ? 'max-w-5xl' : 'max-w-[430px]'
-        } bg-[#F9F8F5] dark:bg-stone-900 min-h-screen sm:min-h-[890px] sm:rounded-[48px] sm:shadow-2xl overflow-hidden flex flex-col justify-between border border-stone-200/50 dark:border-stone-800 pb-6 transition-all duration-300`}
+        } bg-[#F9F8F5] dark:bg-stone-900 min-h-screen sm:min-h-[890px] sm:rounded-[48px] sm:shadow-2xl overflow-hidden flex flex-col justify-between border border-stone-200/50 dark:border-stone-800 pb-2 transition-all duration-300`}
       >
         {/* Top Header */}
         <Header
@@ -384,6 +427,7 @@ export function App() {
           layoutMode={layoutMode}
           onToggleLayoutMode={handleToggleLayoutMode}
           onOpenShortcuts={() => setIsShortcutsOpen(true)}
+          onOpenDevModal={() => setIsDevModalOpen(true)}
         />
 
         {/* Main Body per Active Tab */}
@@ -654,6 +698,9 @@ export function App() {
           )}
         </main>
 
+        {/* AdMob Banner Slot */}
+        <AdMobBanner />
+
         {/* Modals */}
         <GeminiImportModal
           isOpen={isImportOpen}
@@ -671,6 +718,15 @@ export function App() {
           isOpen={isShortcutsOpen}
           onClose={() => setIsShortcutsOpen(false)}
         />
+
+        <DeveloperModal
+          isOpen={isDevModalOpen}
+          onClose={() => setIsDevModalOpen(false)}
+          streak={streak}
+          onUpdateData={handleUpdateData}
+        />
+
+        <AdMobSimulationModal />
       </div>
     </div>
   );

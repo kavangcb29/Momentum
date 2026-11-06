@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   Flame,
   Sparkles,
@@ -13,6 +13,7 @@ import {
   LayoutDashboard,
   Smartphone,
   Command,
+  ShieldAlert,
 } from 'lucide-react';
 
 export type AppTab = 'daily' | 'challenges' | 'progress';
@@ -33,6 +34,7 @@ interface HeaderProps {
   layoutMode: 'mobile' | 'dashboard';
   onToggleLayoutMode: () => void;
   onOpenShortcuts: () => void;
+  onOpenDevModal: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -50,8 +52,32 @@ export const Header: React.FC<HeaderProps> = ({
   layoutMode,
   onToggleLayoutMode,
   onOpenShortcuts,
+  onOpenDevModal,
 }) => {
   const isToday = selectedDate === currentDate;
+  const clickCountRef = useRef(0);
+  const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const isDevAuth = localStorage.getItem('momentum_dev_authenticated') === 'true';
+
+  const handleTitleClick = () => {
+    if (isDevAuth) {
+      onOpenDevModal();
+      return;
+    }
+
+    clickCountRef.current += 1;
+    if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
+
+    if (clickCountRef.current >= 5) {
+      clickCountRef.current = 0;
+      onOpenDevModal();
+    } else {
+      clickTimerRef.current = setTimeout(() => {
+        clickCountRef.current = 0;
+      }, 2500);
+    }
+  };
 
   const formatDateLabel = (dateStr: string) => {
     const d = new Date(dateStr + 'T00:00:00');
@@ -70,12 +96,24 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Top row: logo, date, actions */}
         <div className="flex items-center justify-between mb-3 gap-2">
           <div className="flex items-center gap-2">
-            <h1 className="text-lg font-black tracking-tight text-stone-900 dark:text-stone-100 flex items-center gap-1.5">
-              Momentum
-              <span className="text-xs font-normal text-stone-400 dark:text-stone-500">
-                • {isToday ? 'Today' : formatDateLabel(selectedDate)}
-              </span>
-            </h1>
+            <button
+              type="button"
+              onClick={handleTitleClick}
+              className="text-left group cursor-pointer focus:outline-none"
+              title="Momentum • Creator Easter Egg (tap 5x for Developer Mode)"
+            >
+              <h1 className="text-lg font-black tracking-tight text-stone-900 dark:text-stone-100 flex items-center gap-1.5 select-none">
+                Momentum
+                {isDevAuth && (
+                  <span className="text-[10px] px-1.5 py-0.2 rounded-md bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold border border-amber-500/30 flex items-center gap-0.5">
+                    <ShieldAlert className="w-2.5 h-2.5" /> Dev
+                  </span>
+                )}
+                <span className="text-xs font-normal text-stone-400 dark:text-stone-500">
+                  • {isToday ? 'Today' : formatDateLabel(selectedDate)}
+                </span>
+              </h1>
+            </button>
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
@@ -107,7 +145,7 @@ export const Header: React.FC<HeaderProps> = ({
               {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
             </button>
 
-            {/* Desktop Dashboard / Mobile Phone view toggle (hidden on tiny screens) */}
+            {/* Desktop Dashboard / Mobile Phone view toggle */}
             <button
               onClick={onToggleLayoutMode}
               className="hidden sm:flex p-2 rounded-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-all shadow-xs"
