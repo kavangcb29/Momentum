@@ -12,7 +12,17 @@ import {
   type AdMobRewardItem,
 } from '@capacitor-community/admob';
 
-// Google Official Test Ad Unit IDs (Safe for testing without getting banned)
+// Official Production Ad Unit IDs for Momentum (Connected to Kavan's AdSense/AdMob account)
+export const PROD_AD_UNIT_IDS = {
+  PUBLISHER_ID: 'pub-3571863616373313',
+  ADSENSE_CLIENT: 'ca-pub-3571863616373313',
+  APP_ID: 'ca-app-pub-3571863616373313~2718161000',
+  BANNER: 'ca-app-pub-3571863616373313/8426763199',
+  INTERSTITIAL: 'ca-app-pub-3571863616373313/4588599698',
+  REWARDED: 'ca-app-pub-3571863616373313/4680099039',
+};
+
+// Google Official Test Ad Unit IDs (Safe for testing without policy strikes)
 export const AD_UNIT_IDS = {
   APP: 'ca-app-pub-3940256099942544~3347511713',
   BANNER: 'ca-app-pub-3940256099942544/6300978111',
@@ -31,7 +41,7 @@ export interface NormalizedPublisherInfo {
 
 /**
  * Normalizes any format of Google AdSense / AdMob ID:
- * e.g. "pub-1234567890123456", "ca-pub-1234567890123456", "ca-app-pub-1234567890123456~...", "1234567890123456"
+ * e.g. "pub-3571863616373313", "ca-pub-3571863616373313", "ca-app-pub-3571863616373313~...", "3571863616373313"
  */
 export function normalizePublisherId(raw: string): NormalizedPublisherInfo | null {
   if (!raw) return null;
@@ -39,13 +49,15 @@ export function normalizePublisherId(raw: string): NormalizedPublisherInfo | nul
   if (!digitsMatch) return null;
 
   const digits = digitsMatch[0];
+  const isOwner = digits === '3571863616373313';
+
   return {
     cleanDigits: digits,
     adsenseClientId: `ca-pub-${digits}`,
     admobPublisherId: `ca-app-pub-${digits}`,
-    defaultBannerId: `ca-app-pub-${digits}/6300978111`,
-    defaultInterstitialId: `ca-app-pub-${digits}/1033173712`,
-    defaultRewardedId: `ca-app-pub-${digits}/5224354917`,
+    defaultBannerId: isOwner ? PROD_AD_UNIT_IDS.BANNER : `ca-app-pub-${digits}/6300978111`,
+    defaultInterstitialId: isOwner ? PROD_AD_UNIT_IDS.INTERSTITIAL : `ca-app-pub-${digits}/1033173712`,
+    defaultRewardedId: isOwner ? PROD_AD_UNIT_IDS.REWARDED : `ca-app-pub-${digits}/5224354917`,
   };
 }
 
@@ -80,7 +92,7 @@ export interface AdStatusState {
   bannerLoaded: boolean;
   lastError: string | null;
   mode: 'test' | 'live' | 'simulation';
-  adsenseClientId: string | null;
+  adsenseClientId: string;
   hasCustomPublisherId: boolean;
 }
 
@@ -95,12 +107,10 @@ class MonetizationManager {
     await this.ensureInitialized();
   }
 
-  public getAdSensePublisherId(): string | null {
+  public getAdSensePublisherId(): string {
     const stored = localStorage.getItem('momentum_adsense_pub_id');
     if (stored) return stored.trim();
-    // Support Vite environment variable fallback if provided
-    const envVal = (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_ADSENSE_PUB_ID;
-    return envVal ? envVal.trim() : null;
+    return PROD_AD_UNIT_IDS.ADSENSE_CLIENT;
   }
 
   public setAdSensePublisherId(rawId: string): NormalizedPublisherInfo | null {
@@ -109,7 +119,6 @@ class MonetizationManager {
       localStorage.setItem('momentum_adsense_pub_id', normalized.adsenseClientId);
       localStorage.setItem('momentum_use_live_ads', 'true');
 
-      // Auto-set default ad units if not already set
       if (!localStorage.getItem('momentum_custom_banner_id')) {
         localStorage.setItem('momentum_custom_banner_id', normalized.defaultBannerId);
       }
@@ -120,7 +129,6 @@ class MonetizationManager {
         localStorage.setItem('momentum_custom_rewarded_id', normalized.defaultRewardedId);
       }
 
-      // Pre-load web AdSense tag
       loadGoogleAdSenseTag(normalized.adsenseClientId);
       return normalized;
     }
@@ -141,21 +149,21 @@ class MonetizationManager {
 
     this.isInitializing = true;
 
-    // Load AdSense script if client ID exists
+    // Load AdSense script for client ID
     const adsenseId = this.getAdSensePublisherId();
-    if (adsenseId) {
-      loadGoogleAdSenseTag(adsenseId);
-    }
+    loadGoogleAdSenseTag(adsenseId);
 
     if (Capacitor.isNativePlatform()) {
       try {
-        const useLive = localStorage.getItem('momentum_use_live_ads') === 'true';
+        const storedLive = localStorage.getItem('momentum_use_live_ads');
+        const useLive = storedLive !== null ? storedLive === 'true' : true;
+
         await AdMob.initialize({
           initializeForTesting: !useLive,
         });
         this.isInitialized = true;
         this.setupListeners();
-        console.log('[Monetization] Google AdMob SDK initialized on Android native');
+        console.log('[Monetization] Google AdMob SDK initialized on Android native for Momentum App');
       } catch (err: unknown) {
         const errMsg = err instanceof Error ? err.message : String(err);
         this.lastErrorMessage = errMsg;
@@ -167,7 +175,7 @@ class MonetizationManager {
     } else {
       this.isInitialized = true;
       this.isInitializing = false;
-      console.log('[Monetization] Web/WebView environment active');
+      console.log('[Monetization] Web/WebView environment active with AdSense:', adsenseId);
     }
   }
 
@@ -216,26 +224,26 @@ class MonetizationManager {
     return !devBypass;
   }
 
-  // Get active Ad Unit IDs
+  // Get active Ad Unit IDs (defaults to Live Production unless developer switches to Test Mode)
   public getActiveIds() {
-    const useLive = localStorage.getItem('momentum_use_live_ads') === 'true';
-    const adsenseId = this.getAdSensePublisherId();
-    const normalized = adsenseId ? normalizePublisherId(adsenseId) : null;
+    const storedLive = localStorage.getItem('momentum_use_live_ads');
+    const useLive = storedLive !== null ? storedLive === 'true' : true;
 
+    const adsenseId = this.getAdSensePublisherId();
     const customBanner = localStorage.getItem('momentum_custom_banner_id');
     const customInterstitial = localStorage.getItem('momentum_custom_interstitial_id');
     const customRewarded = localStorage.getItem('momentum_custom_rewarded_id');
 
     const bannerId = useLive
-      ? (customBanner?.trim() || normalized?.defaultBannerId || AD_UNIT_IDS.BANNER)
+      ? (customBanner?.trim() || PROD_AD_UNIT_IDS.BANNER)
       : AD_UNIT_IDS.BANNER;
 
     const interstitialId = useLive
-      ? (customInterstitial?.trim() || normalized?.defaultInterstitialId || AD_UNIT_IDS.INTERSTITIAL)
+      ? (customInterstitial?.trim() || PROD_AD_UNIT_IDS.INTERSTITIAL)
       : AD_UNIT_IDS.INTERSTITIAL;
 
     const rewardedId = useLive
-      ? (customRewarded?.trim() || normalized?.defaultRewardedId || AD_UNIT_IDS.REWARDED)
+      ? (customRewarded?.trim() || PROD_AD_UNIT_IDS.REWARDED)
       : AD_UNIT_IDS.REWARDED;
 
     return {
@@ -286,8 +294,8 @@ class MonetizationManager {
       } catch (err: unknown) {
         const errMsg = err instanceof Error ? err.message : String(err);
         this.lastErrorMessage = errMsg;
-        console.warn('[Monetization] Native banner call failed:', errMsg);
-        // Fallback event so in-app live rotating sponsor banner renders instead
+        console.warn('[Monetization] Native banner call note:', errMsg);
+        // Fallback so in-app live rotating sponsor banner renders smoothly
         window.dispatchEvent(new CustomEvent('momentum_sponsor_banner_show'));
       }
     } else {
@@ -303,7 +311,7 @@ class MonetizationManager {
         this.isBannerShowing = false;
         this.nativeBannerLoaded = false;
       } catch (err) {
-        console.warn('[Monetization] Hide banner error:', err);
+        console.warn('[Monetization] Hide banner note:', err);
       }
     }
     this.isBannerShowing = false;
@@ -330,7 +338,7 @@ class MonetizationManager {
         await AdMob.showInterstitial();
         return true;
       } catch (err) {
-        console.warn('[Monetization] Native interstitial fallback to sponsor modal:', err);
+        console.warn('[Monetization] Native interstitial fallback to partner modal:', err);
         this.triggerInAppInterstitial();
         return true;
       }
@@ -371,7 +379,7 @@ class MonetizationManager {
         const reward = await AdMob.showRewardVideoAd();
         if (reward) return reward;
       } catch (err) {
-        console.warn('[Monetization] Native rewarded video fallback to sponsor showcase:', err);
+        console.warn('[Monetization] Native rewarded video fallback to partner showcase:', err);
       }
     }
 

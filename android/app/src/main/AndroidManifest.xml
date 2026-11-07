@@ -34,10 +34,10 @@
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
 
-        <!-- Google AdMob Application ID (Official Google Test App ID) -->
+        <!-- Google AdMob Application ID (Momentum Production App ID) -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713"/>
+            android:value="ca-app-pub-3571863616373313~2718161000"/>
     </application>
 
     <!-- Permissions -->

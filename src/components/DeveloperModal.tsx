@@ -16,7 +16,7 @@ import {
   Globe,
   Trash2,
 } from 'lucide-react';
-import { monetizationManager, normalizePublisherId } from '../utils/monetization';
+import { monetizationManager, normalizePublisherId, PROD_AD_UNIT_IDS } from '../utils/monetization';
 import { DEFAULT_HABITS, DEFAULT_SETTINGS, saveHabits, saveSettings } from '../utils/storage';
 import type { Habit, DayLog, WinterArcSettings } from '../types';
 
@@ -49,21 +49,22 @@ export const DeveloperModal: React.FC<DeveloperModalProps> = ({
 
   // Google AdSense / Publisher ID state
   const [rawPubInput, setRawPubInput] = useState<string>(() => {
-    return monetizationManager.getAdSensePublisherId() || '';
+    return localStorage.getItem('momentum_adsense_pub_id') || PROD_AD_UNIT_IDS.PUBLISHER_ID;
   });
 
   // Live AdMob Config state
   const [useLiveAds, setUseLiveAds] = useState<boolean>(() => {
-    return localStorage.getItem('momentum_use_live_ads') === 'true';
+    const saved = localStorage.getItem('momentum_use_live_ads');
+    return saved !== null ? saved === 'true' : true;
   });
   const [customBanner, setCustomBanner] = useState<string>(() => {
-    return localStorage.getItem('momentum_custom_banner_id') || '';
+    return localStorage.getItem('momentum_custom_banner_id') || PROD_AD_UNIT_IDS.BANNER;
   });
   const [customInterstitial, setCustomInterstitial] = useState<string>(() => {
-    return localStorage.getItem('momentum_custom_interstitial_id') || '';
+    return localStorage.getItem('momentum_custom_interstitial_id') || PROD_AD_UNIT_IDS.INTERSTITIAL;
   });
   const [customRewarded, setCustomRewarded] = useState<string>(() => {
-    return localStorage.getItem('momentum_custom_rewarded_id') || '';
+    return localStorage.getItem('momentum_custom_rewarded_id') || PROD_AD_UNIT_IDS.REWARDED;
   });
 
   const parsedInfo = normalizePublisherId(rawPubInput);
@@ -74,11 +75,12 @@ export const DeveloperModal: React.FC<DeveloperModalProps> = ({
       setErrorMsg('');
       setFeedbackMsg('');
       setPasscode('');
-      setRawPubInput(monetizationManager.getAdSensePublisherId() || '');
-      setCustomBanner(localStorage.getItem('momentum_custom_banner_id') || '');
-      setCustomInterstitial(localStorage.getItem('momentum_custom_interstitial_id') || '');
-      setCustomRewarded(localStorage.getItem('momentum_custom_rewarded_id') || '');
-      setUseLiveAds(localStorage.getItem('momentum_use_live_ads') === 'true');
+      setRawPubInput(localStorage.getItem('momentum_adsense_pub_id') || PROD_AD_UNIT_IDS.PUBLISHER_ID);
+      setCustomBanner(localStorage.getItem('momentum_custom_banner_id') || PROD_AD_UNIT_IDS.BANNER);
+      setCustomInterstitial(localStorage.getItem('momentum_custom_interstitial_id') || PROD_AD_UNIT_IDS.INTERSTITIAL);
+      setCustomRewarded(localStorage.getItem('momentum_custom_rewarded_id') || PROD_AD_UNIT_IDS.REWARDED);
+      const saved = localStorage.getItem('momentum_use_live_ads');
+      setUseLiveAds(saved !== null ? saved === 'true' : true);
     }
   }, [isOpen]);
 

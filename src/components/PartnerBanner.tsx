@@ -129,7 +129,7 @@ export const PartnerBanner: React.FC = () => {
               className="adsbygoogle"
               style={{ display: 'inline-block', width: '320px', height: '50px' }}
               data-ad-client={adsenseClientId}
-              data-ad-slot="auto"
+              data-ad-slot="8426763199"
               data-ad-format="horizontal"
               data-full-width-responsive="false"
             />
