@@ -28,7 +28,7 @@ export const ArcCountdownCard: React.FC<ArcCountdownCardProps> = ({
   const daysRemaining = Math.max(0, 90 - currentArcDay);
 
   return (
-    <div className="bg-white dark:bg-stone-900 rounded-3xl p-5 shadow-card border border-stone-200/80 dark:border-stone-800 space-y-4">
+    <div className="bg-white dark:bg-stone-900 rounded-3xl p-5 shadow-card border border-stone-200/80 dark:border-stone-800 space-y-4 select-none">
       {/* Top Arc Info */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -53,7 +53,7 @@ export const ArcCountdownCard: React.FC<ArcCountdownCardProps> = ({
         {onToggleRestDay && (
           <button
             onClick={onToggleRestDay}
-            className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition-all ${
+            className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition-colors active-tactile ${
               isRestDay
                 ? 'bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400'
                 : 'bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-500 hover:text-stone-800 dark:hover:text-stone-200'

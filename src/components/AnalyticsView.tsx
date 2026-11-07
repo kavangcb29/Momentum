@@ -60,7 +60,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
         <div className="flex items-center gap-1 flex-1">
           <button
             onClick={() => setSubTab('analytics')}
-            className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+            className={`flex-1 py-2 rounded-xl text-xs font-bold transition-colors active-tactile flex items-center justify-center gap-1.5 ${
               subTab === 'analytics'
                 ? 'bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 shadow-sm'
                 : 'text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-300'
@@ -72,7 +72,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
 
           <button
             onClick={() => setSubTab('journal')}
-            className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+            className={`flex-1 py-2 rounded-xl text-xs font-bold transition-colors active-tactile flex items-center justify-center gap-1.5 ${
               subTab === 'journal'
                 ? 'bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 shadow-sm'
                 : 'text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-300'
@@ -86,7 +86,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
         {/* Excel Export */}
         <button
           onClick={() => exportToExcelCSV(logs, habits, settings)}
-          className="ml-2 px-3 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-xs font-bold flex items-center gap-1 transition-all"
+          className="ml-2 px-3 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-xs font-bold flex items-center gap-1 transition-colors active-tactile"
           title="Download Excel / CSV spreadsheet"
         >
           <Download className="w-3.5 h-3.5" />
@@ -139,10 +139,10 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
             </div>
 
             <div className="mt-2 flex flex-col items-center">
-              <span className="text-[56px] font-bold leading-none tracking-tight text-stone-900">{streak}</span>
-              <span className="text-base font-semibold text-stone-700 mt-1">days in a row</span>
+              <span className="text-[56px] font-bold leading-none tracking-tight text-stone-900 dark:text-stone-100">{streak}</span>
+              <span className="text-base font-semibold text-stone-700 dark:text-stone-300 mt-1">days in a row</span>
             </div>
-            <p className="text-xs text-stone-600 mt-3 px-4 leading-relaxed max-w-sm">
+            <p className="text-xs text-stone-600 dark:text-stone-400 mt-3 px-4 leading-relaxed max-w-sm">
               Complete your daily targets to keep your streak growing. Best so far: {bestDay} pts in a single day.
             </p>
           </section>

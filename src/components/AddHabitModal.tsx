@@ -80,7 +80,7 @@ export const AddHabitModal: React.FC<AddHabitModalProps> = ({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="py-3 space-y-3.5 overflow-y-auto flex-1 pr-1">
+        <form onSubmit={handleSubmit} className="py-3 space-y-3.5 overflow-y-auto flex-1 pr-1 smooth-momentum-scroll">
           <div>
             <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
               Habit Name

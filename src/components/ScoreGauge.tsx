@@ -34,10 +34,10 @@ export const ScoreGauge: React.FC<ScoreGaugeProps> = ({
   }, [earnedPoints, targetPoints]);
 
   return (
-    <div className="bg-streak-gradient dark:from-stone-900 dark:via-stone-850 dark:to-stone-900 rounded-3xl p-5 shadow-soft relative overflow-hidden border border-stone-200/50 dark:border-stone-800 transition-all">
+    <div className="bg-streak-gradient rounded-3xl p-5 shadow-soft relative overflow-hidden border border-stone-200/50 dark:border-stone-800 transition-colors select-none">
       <div className="flex items-center justify-between relative z-10">
         <div>
-          <div className="flex items-center gap-1.5 text-xs text-stone-600 dark:text-stone-300 font-medium">
+          <div className="flex items-center gap-1.5 text-xs text-stone-600 dark:text-stone-400 font-medium">
             <Target className="w-3.5 h-3.5 text-stone-700 dark:text-stone-300" />
             <span className="tracking-wide uppercase font-bold text-[10px]">Daily Target</span>
             {isGoalAchieved && (
@@ -48,16 +48,16 @@ export const ScoreGauge: React.FC<ScoreGaugeProps> = ({
           </div>
 
           <div className="flex items-baseline gap-2 mt-1">
-            <span className="text-4xl font-black text-stone-900 dark:text-stone-900 tracking-tight">
+            <span className="text-4xl font-black text-stone-900 dark:text-stone-100 tracking-tight">
               {earnedPoints}
             </span>
-            <span className="text-sm font-semibold text-stone-600 dark:text-stone-700">
+            <span className="text-sm font-semibold text-stone-600 dark:text-stone-400">
               / {targetPoints} pts
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5 mt-1.5 text-xs font-semibold text-stone-700 dark:text-stone-800">
-            <Zap className={`w-3.5 h-3.5 ${isGoalAchieved ? 'text-emerald-600' : 'text-stone-600'}`} />
+          <div className="flex items-center gap-1.5 mt-1.5 text-xs font-semibold text-stone-700 dark:text-stone-300">
+            <Zap className={`w-3.5 h-3.5 ${isGoalAchieved ? 'text-emerald-600' : 'text-stone-600 dark:text-stone-400'}`} />
             <span>
               {completedHabits} of {totalHabits} completed ({percent}%)
             </span>
@@ -75,8 +75,8 @@ export const ScoreGauge: React.FC<ScoreGaugeProps> = ({
               d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
             />
             <path
-              className={`transition-all duration-500 ease-out ${
-                isGoalAchieved ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-900 dark:text-stone-900'
+              className={`transition-[stroke-dasharray] duration-500 ease-out ${
+                isGoalAchieved ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-900 dark:text-stone-100'
               }`}
               strokeDasharray={`${percent}, 100`}
               strokeWidth="3.5"
@@ -86,7 +86,7 @@ export const ScoreGauge: React.FC<ScoreGaugeProps> = ({
               d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
             />
           </svg>
-          <span className="absolute text-xs font-black text-stone-900 dark:text-stone-900">
+          <span className="absolute text-xs font-black text-stone-900 dark:text-stone-100">
             {percent}%
           </span>
         </div>

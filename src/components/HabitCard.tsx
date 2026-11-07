@@ -58,7 +58,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({
 
   return (
     <div
-      className={`group rounded-3xl border transition-all duration-200 overflow-hidden ${
+      className={`group rounded-3xl border transition-colors duration-150 overflow-hidden select-none active:scale-[0.995] ${
         isDone
           ? 'bg-white/60 dark:bg-stone-900/50 border-stone-200/80 dark:border-stone-800/80 shadow-card'
           : 'bg-white dark:bg-stone-900 border-stone-200/80 dark:border-stone-800 shadow-card hover:shadow-soft dark:hover:border-stone-700'
@@ -67,12 +67,12 @@ export const HabitCard: React.FC<HabitCardProps> = ({
       {/* Main Row */}
       <div
         onClick={() => setIsExpanded(!isExpanded)}
-        className="p-4 flex items-center justify-between cursor-pointer select-none"
+        className="p-4 flex items-center justify-between cursor-pointer"
       >
         <div className="flex items-center gap-3 min-w-0 pr-2">
           {/* Habit Icon */}
           <div
-            className={`w-10 h-10 rounded-2xl flex items-center justify-center text-base flex-shrink-0 transition-all ${
+            className={`w-10 h-10 rounded-2xl flex items-center justify-center text-base flex-shrink-0 transition-colors duration-150 ${
               isDone
                 ? 'bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800'
                 : 'bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700'
@@ -91,7 +91,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({
                 </span>
               )}
               <div
-                className={`text-sm font-semibold truncate transition-all ${
+                className={`text-sm font-semibold truncate transition-colors duration-150 ${
                   isDone
                     ? 'line-through text-stone-400 dark:text-stone-500'
                     : 'text-stone-800 dark:text-stone-100'
@@ -142,7 +142,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({
               e.stopPropagation();
               onDelete(habit.id);
             }}
-            className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-xl text-stone-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+            className="opacity-40 sm:opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-xl text-stone-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 active-tactile"
             title="Delete habit"
           >
             <Trash2 className="w-3.5 h-3.5" />
@@ -152,9 +152,9 @@ export const HabitCard: React.FC<HabitCardProps> = ({
           <button
             type="button"
             onClick={handleToggleClick}
-            className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${
+            className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-transform duration-100 active:scale-90 ${
               isDone
-                ? 'bg-stone-900 dark:bg-stone-100 border-stone-900 dark:border-stone-100 text-white dark:text-stone-900 shadow-sm scale-105'
+                ? 'bg-stone-900 dark:bg-stone-100 border-stone-900 dark:border-stone-100 text-white dark:text-stone-900 shadow-sm'
                 : 'border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 hover:border-stone-500'
             }`}
           >

@@ -419,15 +419,12 @@ export function App() {
   const isFullDashboard = layoutMode === 'dashboard';
 
   return (
-    <div className="min-h-screen bg-[#ECE7DF] dark:bg-stone-950 sm:p-4 flex items-center justify-center font-sans antialiased selection:bg-rose-200 dark:selection:bg-rose-900 transition-colors">
+    <div className="h-full w-full sm:min-h-screen bg-[#ECE7DF] dark:bg-stone-950 sm:p-4 flex items-center justify-center font-sans antialiased selection:bg-rose-200 dark:selection:bg-rose-900 transition-colors overflow-hidden">
       {/* App Container (Phone Frame vs Wide Desktop Dashboard) */}
       <div
         className={`w-full ${
           isFullDashboard ? 'max-w-5xl' : 'max-w-[430px]'
-        } bg-[#F9F8F5] dark:bg-stone-900 min-h-screen sm:min-h-[890px] sm:rounded-[48px] sm:shadow-2xl overflow-hidden flex flex-col justify-between border border-stone-200/50 dark:border-stone-800 transition-all duration-300`}
-        style={{
-          paddingBottom: 'max(calc(env(safe-area-inset-bottom, 0px) + 12px), 16px)',
-        }}
+        } bg-[#F9F8F5] dark:bg-stone-900 h-full sm:h-auto sm:min-h-[890px] sm:rounded-[48px] sm:shadow-2xl overflow-hidden flex flex-col justify-between border border-stone-200/50 dark:border-stone-800 transition-colors`}
       >
         {/* Top Header */}
         <Header
@@ -450,7 +447,7 @@ export function App() {
         />
 
         {/* Main Body per Active Tab */}
-        <main className="w-full px-4 sm:px-6 flex-1 space-y-4 pt-4 pb-16 overflow-y-auto">
+        <main className="w-full px-4 sm:px-6 flex-1 space-y-4 pt-4 pb-6 overflow-y-auto smooth-momentum-scroll">
           {activeTab === 'daily' && (
             <div className="space-y-4 tab-content-enter">
               {/* Date Switcher Bar */}

@@ -93,9 +93,10 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header
       style={{
-        paddingTop: 'max(calc(env(safe-area-inset-top, 0px) + 12px), 18px)',
+        paddingTop: 'max(calc(env(safe-area-inset-top, 0px) + 8px), 14px)',
+        transform: 'translateZ(0)',
       }}
-      className="sticky top-0 z-30 bg-[#F9F8F5]/90 dark:bg-stone-900/90 backdrop-blur-md border-b border-stone-200/80 dark:border-stone-800 px-4 pb-2.5 transition-colors"
+      className="sticky top-0 z-30 bg-[#F9F8F5] dark:bg-stone-900 border-b border-stone-200/80 dark:border-stone-800 px-4 pb-2.5 transition-colors select-none"
     >
       <div className={`mx-auto transition-all duration-300 ${layoutMode === 'dashboard' ? 'max-w-5xl' : 'max-w-md'}`}>
         {/* Top row: logo, date, actions */}
@@ -131,10 +132,10 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Sound Toggle */}
             <button
               onClick={onToggleSound}
-              className={`p-2 rounded-full border transition-all shadow-xs ${
+              className={`p-2 rounded-full border transition-colors shadow-xs active-tactile ${
                 isMuted
                   ? 'bg-stone-100 dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-400'
-                  : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-200 hover:scale-105'
+                  : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-200'
               }`}
               title={isMuted ? 'Unmute Audio Chimes (S)' : 'Mute Audio Chimes (S)'}
             >
@@ -144,7 +145,7 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Dark / Light Mode Toggle */}
             <button
               onClick={onToggleDarkMode}
-              className="p-2 rounded-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-all shadow-xs"
+              className="p-2 rounded-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors shadow-xs active-tactile"
               title={isDarkMode ? 'Switch to Warm Light Theme (D)' : 'Switch to Dark Theme (D)'}
             >
               {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
@@ -153,7 +154,7 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Desktop Dashboard / Mobile Phone view toggle */}
             <button
               onClick={onToggleLayoutMode}
-              className="hidden sm:flex p-2 rounded-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-all shadow-xs"
+              className="hidden sm:flex p-2 rounded-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors shadow-xs active-tactile"
               title={layoutMode === 'dashboard' ? 'Switch to Mobile Preview Frame (V)' : 'Switch to Desktop Dashboard View (V)'}
             >
               {layoutMode === 'dashboard' ? <Smartphone className="w-4 h-4" /> : <LayoutDashboard className="w-4 h-4 text-stone-800 dark:text-stone-200" />}
@@ -162,7 +163,7 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Keyboard Shortcuts Guide */}
             <button
               onClick={onOpenShortcuts}
-              className="hidden md:flex p-2 rounded-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 transition-all shadow-xs"
+              className="hidden md:flex p-2 rounded-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 transition-colors shadow-xs active-tactile"
               title="Keyboard Shortcuts (?)"
             >
               <Command className="w-4 h-4" />
@@ -171,7 +172,7 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Import */}
             <button
               onClick={onOpenImport}
-              className="p-2 rounded-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-all shadow-xs"
+              className="p-2 rounded-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors shadow-xs active-tactile"
               title="Import from Gemini Notebook (I)"
             >
               <Sparkles className="w-4 h-4 text-amber-500" />
@@ -180,7 +181,7 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Add Habit */}
             <button
               onClick={onOpenAdd}
-              className="p-2 rounded-full bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 hover:bg-stone-800 dark:hover:bg-white transition-all shadow-xs"
+              className="p-2 rounded-full bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 hover:bg-stone-800 dark:hover:bg-white transition-colors shadow-xs active-tactile"
               title="Add Habit (N)"
             >
               <Plus className="w-4 h-4" />
@@ -194,7 +195,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`flex-1 py-2 rounded-xl font-semibold flex items-center justify-center gap-1.5 transition-all duration-200 ${
+              className={`flex-1 py-2 rounded-xl font-semibold flex items-center justify-center gap-1.5 transition-colors duration-150 active-tactile ${
                 activeTab === tab.key
                   ? 'bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 shadow-sm'
                   : 'text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-300'

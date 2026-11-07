@@ -49,19 +49,19 @@ export const ChallengesList: React.FC<ChallengesListProps> = ({
   return (
     <div className="space-y-4 tab-content-enter">
       {/* Header Banner */}
-      <section className="bg-streak-gradient rounded-3xl p-6 shadow-soft relative overflow-hidden flex flex-col justify-between border border-stone-200/50 dark:border-stone-800">
+      <section className="bg-streak-gradient rounded-3xl p-6 shadow-soft relative overflow-hidden flex flex-col justify-between border border-stone-200/50 dark:border-stone-800 select-none">
         <div className="flex items-center justify-between">
           <div>
-            <span className="text-xs font-semibold text-stone-600 dark:text-stone-700 uppercase tracking-wider">
+            <span className="text-xs font-semibold text-stone-600 dark:text-stone-300 uppercase tracking-wider">
               Curated Protocols
             </span>
-            <h2 className="text-2xl font-black text-stone-900 mt-0.5">
+            <h2 className="text-2xl font-black text-stone-900 dark:text-stone-100 mt-0.5">
               Challenges & Rules
             </h2>
           </div>
           <button
             onClick={onOpenAdd}
-            className="w-10 h-10 rounded-full bg-white dark:bg-stone-900 shadow-sm border border-stone-200/80 dark:border-stone-700 flex items-center justify-center text-stone-800 dark:text-stone-200 hover:scale-105 active:scale-95 transition-all"
+            className="w-10 h-10 rounded-full bg-white dark:bg-stone-900 shadow-sm border border-stone-200/80 dark:border-stone-700 flex items-center justify-center text-stone-800 dark:text-stone-200 active-tactile transition-colors"
             title="Add New Challenge"
           >
             <Plus className="w-5 h-5" />

@@ -12,12 +12,67 @@ import {
   type AdMobRewardItem,
 } from '@capacitor-community/admob';
 
-// Google Official Test Ad Unit IDs (Google Sample IDs)
+// Google Official Test Ad Unit IDs (Safe for testing without getting banned)
 export const AD_UNIT_IDS = {
+  APP: 'ca-app-pub-3940256099942544~3347511713',
   BANNER: 'ca-app-pub-3940256099942544/6300978111',
   INTERSTITIAL: 'ca-app-pub-3940256099942544/1033173712',
   REWARDED: 'ca-app-pub-3940256099942544/5224354917',
 };
+
+export interface NormalizedPublisherInfo {
+  cleanDigits: string;
+  adsenseClientId: string;
+  admobPublisherId: string;
+  defaultBannerId: string;
+  defaultInterstitialId: string;
+  defaultRewardedId: string;
+}
+
+/**
+ * Normalizes any format of Google AdSense / AdMob ID:
+ * e.g. "pub-1234567890123456", "ca-pub-1234567890123456", "ca-app-pub-1234567890123456~...", "1234567890123456"
+ */
+export function normalizePublisherId(raw: string): NormalizedPublisherInfo | null {
+  if (!raw) return null;
+  const digitsMatch = raw.match(/\d{12,18}/);
+  if (!digitsMatch) return null;
+
+  const digits = digitsMatch[0];
+  return {
+    cleanDigits: digits,
+    adsenseClientId: `ca-pub-${digits}`,
+    admobPublisherId: `ca-app-pub-${digits}`,
+    defaultBannerId: `ca-app-pub-${digits}/6300978111`,
+    defaultInterstitialId: `ca-app-pub-${digits}/1033173712`,
+    defaultRewardedId: `ca-app-pub-${digits}/5224354917`,
+  };
+}
+
+/**
+ * Dynamically loads the official Google AdSense library for Web & WebView preview
+ */
+export function loadGoogleAdSenseTag(clientId: string): void {
+  if (typeof document === 'undefined') return;
+  const existing = document.getElementById('google-adsense-script');
+  if (existing) {
+    if (existing.getAttribute('data-client') === clientId) return;
+    existing.remove();
+  }
+
+  try {
+    const script = document.createElement('script');
+    script.id = 'google-adsense-script';
+    script.async = true;
+    script.crossOrigin = 'anonymous';
+    script.setAttribute('data-client', clientId);
+    script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${clientId}`;
+    document.head.appendChild(script);
+    console.log(`[Monetization] Google AdSense SDK injected for ${clientId}`);
+  } catch (e) {
+    console.warn('[Monetization] Failed to inject Google AdSense script:', e);
+  }
+}
 
 export interface AdStatusState {
   isNative: boolean;
@@ -25,6 +80,8 @@ export interface AdStatusState {
   bannerLoaded: boolean;
   lastError: string | null;
   mode: 'test' | 'live' | 'simulation';
+  adsenseClientId: string | null;
+  hasCustomPublisherId: boolean;
 }
 
 class MonetizationManager {
@@ -38,11 +95,57 @@ class MonetizationManager {
     await this.ensureInitialized();
   }
 
+  public getAdSensePublisherId(): string | null {
+    const stored = localStorage.getItem('momentum_adsense_pub_id');
+    if (stored) return stored.trim();
+    // Support Vite environment variable fallback if provided
+    const envVal = (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_ADSENSE_PUB_ID;
+    return envVal ? envVal.trim() : null;
+  }
+
+  public setAdSensePublisherId(rawId: string): NormalizedPublisherInfo | null {
+    const normalized = normalizePublisherId(rawId);
+    if (normalized) {
+      localStorage.setItem('momentum_adsense_pub_id', normalized.adsenseClientId);
+      localStorage.setItem('momentum_use_live_ads', 'true');
+
+      // Auto-set default ad units if not already set
+      if (!localStorage.getItem('momentum_custom_banner_id')) {
+        localStorage.setItem('momentum_custom_banner_id', normalized.defaultBannerId);
+      }
+      if (!localStorage.getItem('momentum_custom_interstitial_id')) {
+        localStorage.setItem('momentum_custom_interstitial_id', normalized.defaultInterstitialId);
+      }
+      if (!localStorage.getItem('momentum_custom_rewarded_id')) {
+        localStorage.setItem('momentum_custom_rewarded_id', normalized.defaultRewardedId);
+      }
+
+      // Pre-load web AdSense tag
+      loadGoogleAdSenseTag(normalized.adsenseClientId);
+      return normalized;
+    }
+    return null;
+  }
+
+  public clearCustomPublisherId(): void {
+    localStorage.removeItem('momentum_adsense_pub_id');
+    localStorage.removeItem('momentum_custom_banner_id');
+    localStorage.removeItem('momentum_custom_interstitial_id');
+    localStorage.removeItem('momentum_custom_rewarded_id');
+    localStorage.setItem('momentum_use_live_ads', 'false');
+  }
+
   public async ensureInitialized(): Promise<void> {
     if (this.isInitialized) return;
     if (this.isInitializing) return;
 
     this.isInitializing = true;
+
+    // Load AdSense script if client ID exists
+    const adsenseId = this.getAdSensePublisherId();
+    if (adsenseId) {
+      loadGoogleAdSenseTag(adsenseId);
+    }
 
     if (Capacitor.isNativePlatform()) {
       try {
@@ -52,19 +155,19 @@ class MonetizationManager {
         });
         this.isInitialized = true;
         this.setupListeners();
-        console.log('[Monetization] Google AdMob SDK initialized successfully on Android native');
+        console.log('[Monetization] Google AdMob SDK initialized on Android native');
       } catch (err: unknown) {
         const errMsg = err instanceof Error ? err.message : String(err);
         this.lastErrorMessage = errMsg;
-        console.warn('[Monetization] Native initialization warning:', errMsg);
-        this.isInitialized = true; // allow fallback
+        console.warn('[Monetization] Native AdMob initialization note:', errMsg);
+        this.isInitialized = true; // allow resilient fallback
       } finally {
         this.isInitializing = false;
       }
     } else {
       this.isInitialized = true;
       this.isInitializing = false;
-      console.log('[Monetization] Browser environment active - Live Sponsor & Simulation enabled');
+      console.log('[Monetization] Web/WebView environment active');
     }
   }
 
@@ -103,7 +206,7 @@ class MonetizationManager {
         console.warn('[Monetization Event] Native Rewarded Video failed:', err);
       });
     } catch (e) {
-      console.warn('[Monetization] Could not attach listeners:', e);
+      console.warn('[Monetization] Could not attach AdMob listeners:', e);
     }
   }
 
@@ -113,18 +216,34 @@ class MonetizationManager {
     return !devBypass;
   }
 
-  // Get active Ad Unit IDs (allowing custom live IDs from localStorage)
+  // Get active Ad Unit IDs
   public getActiveIds() {
     const useLive = localStorage.getItem('momentum_use_live_ads') === 'true';
+    const adsenseId = this.getAdSensePublisherId();
+    const normalized = adsenseId ? normalizePublisherId(adsenseId) : null;
+
     const customBanner = localStorage.getItem('momentum_custom_banner_id');
     const customInterstitial = localStorage.getItem('momentum_custom_interstitial_id');
     const customRewarded = localStorage.getItem('momentum_custom_rewarded_id');
 
+    const bannerId = useLive
+      ? (customBanner?.trim() || normalized?.defaultBannerId || AD_UNIT_IDS.BANNER)
+      : AD_UNIT_IDS.BANNER;
+
+    const interstitialId = useLive
+      ? (customInterstitial?.trim() || normalized?.defaultInterstitialId || AD_UNIT_IDS.INTERSTITIAL)
+      : AD_UNIT_IDS.INTERSTITIAL;
+
+    const rewardedId = useLive
+      ? (customRewarded?.trim() || normalized?.defaultRewardedId || AD_UNIT_IDS.REWARDED)
+      : AD_UNIT_IDS.REWARDED;
+
     return {
       isLive: useLive,
-      BANNER: useLive && customBanner ? customBanner.trim() : AD_UNIT_IDS.BANNER,
-      INTERSTITIAL: useLive && customInterstitial ? customInterstitial.trim() : AD_UNIT_IDS.INTERSTITIAL,
-      REWARDED: useLive && customRewarded ? customRewarded.trim() : AD_UNIT_IDS.REWARDED,
+      adsenseClientId: adsenseId,
+      BANNER: bannerId,
+      INTERSTITIAL: interstitialId,
+      REWARDED: rewardedId,
     };
   }
 
@@ -136,6 +255,8 @@ class MonetizationManager {
       bannerLoaded: this.nativeBannerLoaded,
       lastError: this.lastErrorMessage,
       mode: !Capacitor.isNativePlatform() ? 'simulation' : active.isLive ? 'live' : 'test',
+      adsenseClientId: active.adsenseClientId,
+      hasCustomPublisherId: Boolean(active.adsenseClientId),
     };
   }
 
@@ -149,7 +270,6 @@ class MonetizationManager {
     if (this.isBannerShowing) return;
 
     await this.ensureInitialized();
-
     const ids = this.getActiveIds();
 
     if (Capacitor.isNativePlatform()) {
@@ -167,7 +287,7 @@ class MonetizationManager {
         const errMsg = err instanceof Error ? err.message : String(err);
         this.lastErrorMessage = errMsg;
         console.warn('[Monetization] Native banner call failed:', errMsg);
-        // Dispatch fallback event so in-app live rotating sponsor banner renders instead
+        // Fallback event so in-app live rotating sponsor banner renders instead
         window.dispatchEvent(new CustomEvent('momentum_sponsor_banner_show'));
       }
     } else {
@@ -210,7 +330,7 @@ class MonetizationManager {
         await AdMob.showInterstitial();
         return true;
       } catch (err) {
-        console.warn('[Monetization] Native interstitial failed, falling back to in-app sponsor modal:', err);
+        console.warn('[Monetization] Native interstitial fallback to sponsor modal:', err);
         this.triggerInAppInterstitial();
         return true;
       }
@@ -231,7 +351,7 @@ class MonetizationManager {
     );
   }
 
-  // 3. Rewarded Video Ad (Watch to earn Streak Shield)
+  // 3. Rewarded Video Ad
   public async showRewarded(): Promise<AdMobRewardItem | null> {
     if (!this.areAdsEnabled()) {
       console.log('[Monetization] Rewarded ad bypassed for Creator');
@@ -251,7 +371,7 @@ class MonetizationManager {
         const reward = await AdMob.showRewardVideoAd();
         if (reward) return reward;
       } catch (err) {
-        console.warn('[Monetization] Native rewarded video failed or unfilled. Falling back to live sponsor video:', err);
+        console.warn('[Monetization] Native rewarded video fallback to sponsor showcase:', err);
       }
     }
 

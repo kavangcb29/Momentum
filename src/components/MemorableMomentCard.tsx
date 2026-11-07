@@ -95,7 +95,7 @@ export const MemorableMomentCard: React.FC<MemorableMomentCardProps> = ({
             setIsSaved(true);
             setTimeout(() => setIsSaved(false), 2000);
           }}
-          className="px-3 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 font-semibold transition-all flex items-center gap-1"
+          className="px-3 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 font-semibold transition-colors active-tactile flex items-center gap-1"
         >
           <Check className="w-3 h-3" />
           <span>Save</span>

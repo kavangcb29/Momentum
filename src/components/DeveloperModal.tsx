@@ -13,8 +13,10 @@ import {
   Sparkles,
   Settings2,
   Radio,
+  Globe,
+  Trash2,
 } from 'lucide-react';
-import { monetizationManager } from '../utils/monetization';
+import { monetizationManager, normalizePublisherId } from '../utils/monetization';
 import { DEFAULT_HABITS, DEFAULT_SETTINGS, saveHabits, saveSettings } from '../utils/storage';
 import type { Habit, DayLog, WinterArcSettings } from '../types';
 
@@ -45,6 +47,11 @@ export const DeveloperModal: React.FC<DeveloperModalProps> = ({
   });
   const [feedbackMsg, setFeedbackMsg] = useState('');
 
+  // Google AdSense / Publisher ID state
+  const [rawPubInput, setRawPubInput] = useState<string>(() => {
+    return monetizationManager.getAdSensePublisherId() || '';
+  });
+
   // Live AdMob Config state
   const [useLiveAds, setUseLiveAds] = useState<boolean>(() => {
     return localStorage.getItem('momentum_use_live_ads') === 'true';
@@ -59,6 +66,7 @@ export const DeveloperModal: React.FC<DeveloperModalProps> = ({
     return localStorage.getItem('momentum_custom_rewarded_id') || '';
   });
 
+  const parsedInfo = normalizePublisherId(rawPubInput);
   const adStatus = monetizationManager.getStatus();
 
   useEffect(() => {
@@ -66,6 +74,11 @@ export const DeveloperModal: React.FC<DeveloperModalProps> = ({
       setErrorMsg('');
       setFeedbackMsg('');
       setPasscode('');
+      setRawPubInput(monetizationManager.getAdSensePublisherId() || '');
+      setCustomBanner(localStorage.getItem('momentum_custom_banner_id') || '');
+      setCustomInterstitial(localStorage.getItem('momentum_custom_interstitial_id') || '');
+      setCustomRewarded(localStorage.getItem('momentum_custom_rewarded_id') || '');
+      setUseLiveAds(localStorage.getItem('momentum_use_live_ads') === 'true');
     }
   }, [isOpen]);
 
@@ -105,19 +118,50 @@ export const DeveloperModal: React.FC<DeveloperModalProps> = ({
     const next = !useLiveAds;
     setUseLiveAds(next);
     localStorage.setItem('momentum_use_live_ads', String(next));
-    showFeedback(next ? 'Switched to LIVE Production Ads mode.' : 'Switched to Test Ads mode.');
+    showFeedback(next ? 'Switched to LIVE Production Ads mode.' : 'Switched to Google Test Ads mode.');
+  };
+
+  // Save Google AdSense Publisher ID and auto-populate ad units
+  const handleApplyAdSenseId = () => {
+    if (!rawPubInput.trim()) {
+      showFeedback('Please enter your Google AdSense Publisher ID.');
+      return;
+    }
+
+    const normalized = monetizationManager.setAdSensePublisherId(rawPubInput.trim());
+    if (normalized) {
+      setUseLiveAds(true);
+      setCustomBanner(normalized.defaultBannerId);
+      setCustomInterstitial(normalized.defaultInterstitialId);
+      setCustomRewarded(normalized.defaultRewardedId);
+      setRawPubInput(normalized.adsenseClientId);
+      showFeedback(`✅ AdSense & AdMob linked to ${normalized.adsenseClientId}! Live mode activated.`);
+      monetizationManager.showBanner();
+    } else {
+      setErrorMsg('Invalid format. Please enter pub-XXXXXXXXXXXXXXXX or ca-pub-XXXXXXXXXXXXXXXX');
+    }
+  };
+
+  const handleClearAdSenseId = () => {
+    monetizationManager.clearCustomPublisherId();
+    setRawPubInput('');
+    setCustomBanner('');
+    setCustomInterstitial('');
+    setCustomRewarded('');
+    setUseLiveAds(false);
+    showFeedback('Reset to default official Google test configuration.');
   };
 
   const handleSaveCustomIds = () => {
     localStorage.setItem('momentum_custom_banner_id', customBanner.trim());
     localStorage.setItem('momentum_custom_interstitial_id', customInterstitial.trim());
     localStorage.setItem('momentum_custom_rewarded_id', customRewarded.trim());
-    showFeedback('Live AdMob Unit IDs saved successfully!');
+    showFeedback('Custom Ad Unit IDs saved successfully!');
   };
 
   const showFeedback = (msg: string) => {
     setFeedbackMsg(msg);
-    setTimeout(() => setFeedbackMsg(''), 3000);
+    setTimeout(() => setFeedbackMsg(''), 3500);
   };
 
   // Test Ad triggers
@@ -155,6 +199,7 @@ export const DeveloperModal: React.FC<DeveloperModalProps> = ({
       habits: localStorage.getItem('momentum_habits_v5'),
       logs: localStorage.getItem('momentum_logs_v1'),
       settings: localStorage.getItem('momentum_settings_v2'),
+      adsense: monetizationManager.getAdSensePublisherId(),
       exportedAt: new Date().toISOString(),
     };
     const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
@@ -188,7 +233,7 @@ export const DeveloperModal: React.FC<DeveloperModalProps> = ({
                 )}
               </div>
               <p className="text-xs text-stone-400">
-                Creator master controls & live AdMob monetization manager
+                Creator master controls & Google AdSense / AdMob config
               </p>
             </div>
           </div>
@@ -203,7 +248,7 @@ export const DeveloperModal: React.FC<DeveloperModalProps> = ({
         {/* Feedback message */}
         {feedbackMsg && (
           <div className="mt-3 p-2.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs font-semibold flex items-center gap-2 animate-fadeIn">
-            <Check className="w-4 h-4" />
+            <Check className="w-4 h-4 flex-shrink-0" />
             <span>{feedbackMsg}</span>
           </div>
         )}
@@ -212,7 +257,7 @@ export const DeveloperModal: React.FC<DeveloperModalProps> = ({
         {!isAuthenticated ? (
           <form onSubmit={handleLogin} className="py-6 space-y-4">
             <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-800/60 border border-stone-100 dark:border-stone-800 text-xs text-stone-600 dark:text-stone-400 leading-relaxed">
-              Enter your developer PIN to unlock master controls, configure live AdMob IDs, and bypass ads.
+              Enter your developer PIN to unlock master controls, configure live Google AdSense IDs, and bypass ads.
               <div className="mt-1 text-[11px] text-stone-400">
                 Default creator PIN: <span className="font-mono font-bold text-stone-700 dark:text-stone-300">2909</span>
               </div>
@@ -245,7 +290,7 @@ export const DeveloperModal: React.FC<DeveloperModalProps> = ({
 
             <button
               type="submit"
-              className="w-full py-3 rounded-full bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 font-semibold text-xs flex items-center justify-center gap-2 shadow-sm"
+              className="w-full py-3 rounded-full bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 font-semibold text-xs flex items-center justify-center gap-2 shadow-sm active-tactile"
             >
               <KeyRound className="w-4 h-4" />
               <span>Authenticate as Developer</span>
@@ -253,22 +298,26 @@ export const DeveloperModal: React.FC<DeveloperModalProps> = ({
           </form>
         ) : (
           /* Authenticated Admin Controls */
-          <div className="py-4 space-y-4 overflow-y-auto flex-1 pr-1">
+          <div className="py-4 space-y-4 overflow-y-auto flex-1 pr-1 smooth-momentum-scroll">
             {/* Live Status Pill */}
             <div className="p-3 rounded-2xl bg-stone-100 dark:bg-stone-800 border border-stone-200/80 dark:border-stone-700 flex items-center justify-between text-xs">
               <div className="flex items-center gap-2">
                 <Radio className={`w-4 h-4 ${adStatus.isNative ? 'text-emerald-500' : 'text-amber-500'}`} />
                 <div>
                   <span className="font-bold text-stone-800 dark:text-stone-200 block text-[11px]">
-                    {adStatus.isNative ? 'Native Android Environment' : 'Web Browser Preview'}
+                    {adStatus.isNative ? 'Native Android Environment' : 'Web & WebView Environment'}
                   </span>
                   <span className="text-[10px] text-stone-400">
-                    Mode: {useLiveAds ? '🔥 Live Production' : '🧪 Google Test / Sponsor'}
+                    Mode: {useLiveAds ? '🔥 Live Production Google Ads' : '🧪 Google Official Sample Test Ads'}
                   </span>
                 </div>
               </div>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 font-bold">
-                Active
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                adStatus.hasCustomPublisherId
+                  ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400'
+                  : 'bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400'
+              }`}>
+                {adStatus.hasCustomPublisherId ? 'Custom ID' : 'Test Mode'}
               </span>
             </div>
 
@@ -286,7 +335,7 @@ export const DeveloperModal: React.FC<DeveloperModalProps> = ({
                 </div>
                 <button
                   onClick={handleToggleAds}
-                  className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all active-tactile ${
                     adsDisabled
                       ? 'bg-amber-500 text-white shadow-xs'
                       : 'bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300'
@@ -297,29 +346,86 @@ export const DeveloperModal: React.FC<DeveloperModalProps> = ({
               </div>
             </div>
 
-            {/* Live Production IDs Configuration */}
+            {/* Google AdSense Publisher ID Quick Config */}
+            <div className="p-4 rounded-3xl bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200/80 dark:border-indigo-800/60 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <Globe className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                  <h4 className="text-xs font-bold text-stone-900 dark:text-stone-100">
+                    Google AdSense Publisher ID
+                  </h4>
+                </div>
+                {parsedInfo && (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 font-bold">
+                    Valid ID
+                  </span>
+                )}
+              </div>
+
+              <p className="text-[11px] text-stone-600 dark:text-stone-400 leading-relaxed">
+                Paste your Google AdSense Publisher ID (e.g. <span className="font-mono font-semibold">pub-1234567890123456</span> or <span className="font-mono font-semibold">ca-pub-1234567890123456</span>). Momentum will automatically format and connect both web AdSense tags and native Android AdMob!
+              </p>
+
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  value={rawPubInput}
+                  onChange={(e) => setRawPubInput(e.target.value)}
+                  placeholder="pub-XXXXXXXXXXXXXXXX or ca-pub-XXXXXXXXXXXXXXXX"
+                  className="w-full bg-white dark:bg-stone-900 border border-indigo-200 dark:border-indigo-800/80 rounded-xl px-3 py-2 font-mono text-xs text-stone-900 dark:text-stone-100 focus:outline-none focus:border-indigo-500"
+                />
+
+                {parsedInfo && (
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-stone-900/80 border border-indigo-100 dark:border-indigo-900/40 text-[11px] space-y-1 font-mono text-stone-600 dark:text-stone-300">
+                    <div>Web Client: <span className="text-indigo-600 dark:text-indigo-400 font-bold">{parsedInfo.adsenseClientId}</span></div>
+                    <div>AdMob Pub: <span className="text-emerald-600 dark:text-emerald-400 font-bold">{parsedInfo.admobPublisherId}</span></div>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    onClick={handleApplyAdSenseId}
+                    className="flex-1 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs active-tactile flex items-center justify-center gap-1.5"
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Apply & Activate Live Ads</span>
+                  </button>
+                  {monetizationManager.getAdSensePublisherId() && (
+                    <button
+                      onClick={handleClearAdSenseId}
+                      className="p-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-500 dark:text-stone-400 active-tactile"
+                      title="Reset to default test IDs"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Detailed AdMob Unit IDs Accordion */}
             <div className="p-4 rounded-3xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200/80 dark:border-stone-700 space-y-3">
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-bold text-stone-900 dark:text-stone-100 flex items-center gap-1.5">
-                  <Settings2 className="w-4 h-4 text-indigo-500" />
-                  <span>Google AdMob Unit IDs</span>
+                  <Settings2 className="w-4 h-4 text-stone-500" />
+                  <span>Custom AdMob Ad Unit IDs (Optional)</span>
                 </h4>
                 <button
                   onClick={handleToggleLiveAds}
-                  className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all ${
+                  className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all active-tactile ${
                     useLiveAds
                       ? 'bg-emerald-500 text-white'
                       : 'bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-300'
                   }`}
                 >
-                  {useLiveAds ? '● Live Mode' : '○ Test Mode'}
+                  {useLiveAds ? '● Live Production' : '○ Google Test'}
                 </button>
               </div>
 
               <div className="space-y-2 text-[11px]">
                 <div>
                   <label className="block text-stone-500 dark:text-stone-400 font-semibold mb-0.5">
-                    Live Banner Ad Unit ID
+                    Banner Ad Unit ID
                   </label>
                   <input
                     type="text"
@@ -332,7 +438,7 @@ export const DeveloperModal: React.FC<DeveloperModalProps> = ({
 
                 <div>
                   <label className="block text-stone-500 dark:text-stone-400 font-semibold mb-0.5">
-                    Live Interstitial Ad Unit ID
+                    Interstitial Ad Unit ID
                   </label>
                   <input
                     type="text"
@@ -345,7 +451,7 @@ export const DeveloperModal: React.FC<DeveloperModalProps> = ({
 
                 <div>
                   <label className="block text-stone-500 dark:text-stone-400 font-semibold mb-0.5">
-                    Live Rewarded Video Ad Unit ID
+                    Rewarded Video Ad Unit ID
                   </label>
                   <input
                     type="text"
@@ -358,9 +464,9 @@ export const DeveloperModal: React.FC<DeveloperModalProps> = ({
 
                 <button
                   onClick={handleSaveCustomIds}
-                  className="w-full py-2 rounded-xl bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 font-bold text-xs shadow-xs"
+                  className="w-full py-2 rounded-xl bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 font-bold text-xs shadow-xs active-tactile"
                 >
-                  Save AdMob Unit IDs
+                  Save Custom Unit IDs
                 </button>
               </div>
             </div>
@@ -373,7 +479,7 @@ export const DeveloperModal: React.FC<DeveloperModalProps> = ({
               <div className="grid grid-cols-3 gap-2">
                 <button
                   onClick={handleTestBanner}
-                  className="p-2.5 rounded-2xl bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 border border-stone-200/80 dark:border-stone-700 text-left transition-all"
+                  className="p-2.5 rounded-2xl bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 border border-stone-200/80 dark:border-stone-700 text-left transition-all active-tactile"
                 >
                   <div className="text-[11px] font-bold text-stone-800 dark:text-stone-200">
                     Banner
@@ -385,7 +491,7 @@ export const DeveloperModal: React.FC<DeveloperModalProps> = ({
 
                 <button
                   onClick={handleTestInterstitial}
-                  className="p-2.5 rounded-2xl bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 border border-stone-200/80 dark:border-stone-700 text-left transition-all"
+                  className="p-2.5 rounded-2xl bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 border border-stone-200/80 dark:border-stone-700 text-left transition-all active-tactile"
                 >
                   <div className="flex items-center gap-1 text-[11px] font-bold text-stone-800 dark:text-stone-200">
                     <Layers className="w-3 h-3 text-indigo-500" />
@@ -398,7 +504,7 @@ export const DeveloperModal: React.FC<DeveloperModalProps> = ({
 
                 <button
                   onClick={handleTestRewarded}
-                  className="p-2.5 rounded-2xl bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 border border-stone-200/80 dark:border-stone-700 text-left transition-all"
+                  className="p-2.5 rounded-2xl bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 border border-stone-200/80 dark:border-stone-700 text-left transition-all active-tactile"
                 >
                   <div className="flex items-center gap-1 text-[11px] font-bold text-stone-800 dark:text-stone-200">
                     <Tv className="w-3 h-3 text-rose-500" />
@@ -419,7 +525,7 @@ export const DeveloperModal: React.FC<DeveloperModalProps> = ({
               <div className="space-y-2">
                 <button
                   onClick={handleResetToCoreDefaults}
-                  className="w-full p-2.5 rounded-2xl bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 border border-stone-200/80 dark:border-stone-700 text-xs font-semibold text-stone-700 dark:text-stone-200 flex items-center justify-between"
+                  className="w-full p-2.5 rounded-2xl bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 border border-stone-200/80 dark:border-stone-700 text-xs font-semibold text-stone-700 dark:text-stone-200 flex items-center justify-between active-tactile"
                 >
                   <span className="flex items-center gap-2">
                     <RotateCcw className="w-3.5 h-3.5 text-stone-500" />
@@ -430,7 +536,7 @@ export const DeveloperModal: React.FC<DeveloperModalProps> = ({
 
                 <button
                   onClick={handleExportFullJSON}
-                  className="w-full p-2.5 rounded-2xl bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 border border-stone-200/80 dark:border-stone-700 text-xs font-semibold text-stone-700 dark:text-stone-200 flex items-center justify-between"
+                  className="w-full p-2.5 rounded-2xl bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 border border-stone-200/80 dark:border-stone-700 text-xs font-semibold text-stone-700 dark:text-stone-200 flex items-center justify-between active-tactile"
                 >
                   <span className="flex items-center gap-2">
                     <Download className="w-3.5 h-3.5 text-emerald-500" />
@@ -451,7 +557,7 @@ export const DeveloperModal: React.FC<DeveloperModalProps> = ({
               </button>
               <button
                 onClick={onClose}
-                className="px-4 py-2 rounded-full bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-semibold"
+                className="px-4 py-2 rounded-full bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-xs font-semibold active-tactile"
               >
                 Done
               </button>
