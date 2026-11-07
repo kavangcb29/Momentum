@@ -323,6 +323,22 @@ export const DeveloperModal: React.FC<DeveloperModalProps> = ({
               </span>
             </div>
 
+            {/* AdMob Diagnostic / Error Status if present */}
+            {adStatus.lastError && (
+              <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-amber-900 dark:text-amber-200 text-xs space-y-1">
+                <div className="font-bold text-[11px] flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Google AdMob Server Response</span>
+                </div>
+                <div className="font-mono text-[10px] bg-white dark:bg-stone-900 p-2 rounded-xl border border-amber-200/60 dark:border-amber-800/40 break-all text-stone-700 dark:text-stone-300">
+                  {adStatus.lastError}
+                </div>
+                <p className="text-[10px] text-amber-700/80 dark:text-amber-400/80 leading-tight">
+                  Code 3 ("No fill") indicates Google's ad servers are currently indexing your new ad units or awaiting account payment profile verification.
+                </p>
+              </div>
+            )}
+
             {/* VIP Ad-Free Toggle */}
             <div className="p-4 rounded-3xl bg-amber-500/10 border border-amber-500/20 space-y-2">
               <div className="flex items-center justify-between">
