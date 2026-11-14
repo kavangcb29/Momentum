@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   getHabits,
   saveHabits,
@@ -20,20 +20,15 @@ import { ChallengesList } from './components/ChallengesList';
 import { MemorableMomentCard } from './components/MemorableMomentCard';
 import { ArcCountdownCard } from './components/ArcCountdownCard';
 import { KeyboardShortcutsModal } from './components/KeyboardShortcutsModal';
-import { DeveloperModal } from './components/DeveloperModal';
-import { PartnerBanner } from './components/PartnerBanner';
-import { PartnerAdModal } from './components/PartnerAdModal';
-import { SponsoredRewardCard } from './components/SponsoredRewardCard';
+import { AccountSyncModal } from './components/AccountSyncModal';
 import { soundManager } from './utils/audio';
-import { monetizationManager } from './utils/monetization';
+import { cloudSync } from './utils/firebaseSync';
 import {
-  Sparkles,
   ArrowLeft,
   ArrowRight,
   Share2,
   Check,
   Search,
-  CheckCircle2,
   Shield,
 } from 'lucide-react';
 
@@ -69,17 +64,21 @@ export function App() {
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
-  const [isDevModalOpen, setIsDevModalOpen] = useState(false);
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [copiedShare, setCopiedShare] = useState(false);
 
-  const prevCompletedPointsRef = useRef<number>(0);
-
-  // Initialize data and Monetization
+  // Initialize data and Cloud Sync
   useEffect(() => {
     setHabits(getHabits());
     setLogs(getLogs());
     setSettings(getSettings());
-    monetizationManager.initialize();
+
+    // Attempt cloud sync on startup if signed in
+    cloudSync.syncWithCloud().then((synced) => {
+      setHabits(synced.habits);
+      setLogs(synced.logs);
+      setSettings(synced.settings);
+    }).catch(() => {});
   }, []);
 
   // Sync dark mode class on document and body
@@ -111,19 +110,6 @@ export function App() {
   // Streak
   const streak = calculateStreak(logs, settings.dailyTargetPoints, settings.streakThresholdPercent);
 
-  // Check for goal completion to trigger interstitial ad
-  useEffect(() => {
-    const currentPts = currentLog.totalPoints;
-    const target = settings.dailyTargetPoints;
-    if (currentPts >= target && target > 0 && prevCompletedPointsRef.current < target) {
-      // Trigger Interstitial Ad (automatically bypassed if developer mode active)
-      setTimeout(() => {
-        monetizationManager.showInterstitial();
-      }, 1200);
-    }
-    prevCompletedPointsRef.current = currentPts;
-  }, [currentLog.totalPoints, settings.dailyTargetPoints]);
-
   // Toggle habit for selected date
   const handleToggleHabit = useCallback((habitId: string) => {
     const isCompleted = currentLog.completedHabitIds.includes(habitId);
@@ -145,18 +131,14 @@ export function App() {
     const newLogs = { ...logs, [selectedDate]: updatedLog };
     setLogs(newLogs);
     saveDayLog(updatedLog);
-  }, [currentLog, habits, logs, selectedDate]);
 
-  // Toggle Rest Day with Rewarded Ad option
-  const handleToggleRestDay = async () => {
+    // Sync to personal cloud database
+    cloudSync.pushUpdate(habits, newLogs, settings);
+  }, [currentLog, habits, logs, selectedDate, settings]);
+
+  // Toggle Rest Day
+  const handleToggleRestDay = () => {
     const nextRestState = !currentLog.isRestDay;
-
-    // If activating rest day and ads are enabled, trigger Rewarded Video Ad
-    if (nextRestState && monetizationManager.areAdsEnabled()) {
-      const reward = await monetizationManager.showRewarded();
-      if (!reward) return; // User skipped rewarded video
-    }
-
     const updatedLog: DayLog = {
       ...currentLog,
       isRestDay: nextRestState,
@@ -164,6 +146,8 @@ export function App() {
     const newLogs = { ...logs, [selectedDate]: updatedLog };
     setLogs(newLogs);
     saveDayLog(updatedLog);
+
+    cloudSync.pushUpdate(habits, newLogs, settings);
   };
 
   // Save memorable moment for selected date
@@ -176,6 +160,8 @@ export function App() {
     const newLogs = { ...logs, [selectedDate]: updatedLog };
     setLogs(newLogs);
     saveDayLog(updatedLog);
+
+    cloudSync.pushUpdate(habits, newLogs, settings);
   };
 
   // Add a new habit
@@ -188,6 +174,8 @@ export function App() {
     const updatedSettings = { ...settings, dailyTargetPoints: newTarget };
     setSettings(updatedSettings);
     saveSettings(updatedSettings);
+
+    cloudSync.pushUpdate(updated, logs, updatedSettings);
   };
 
   // Delete a habit
@@ -199,6 +187,8 @@ export function App() {
     if (currentLog.completedHabitIds.includes(habitId)) {
       handleToggleHabit(habitId);
     }
+
+    cloudSync.pushUpdate(updated, logs, settings);
   };
 
   // Import habits and optional logs from Gemini parser
@@ -206,16 +196,19 @@ export function App() {
     setHabits(importedHabits);
     saveHabits(importedHabits);
 
+    let currentLogs = logs;
     if (importedLogs && Object.keys(importedLogs).length > 0) {
-      const mergedLogs = { ...logs, ...importedLogs };
-      setLogs(mergedLogs);
-      localStorage.setItem('momentum_logs_v1', JSON.stringify(mergedLogs));
+      currentLogs = { ...logs, ...importedLogs };
+      setLogs(currentLogs);
+      localStorage.setItem('momentum_logs_v1', JSON.stringify(currentLogs));
     }
 
     const totalPoints = importedHabits.reduce((acc, h) => acc + h.points, 0);
     const updatedSettings = { ...settings, dailyTargetPoints: totalPoints };
     setSettings(updatedSettings);
     saveSettings(updatedSettings);
+
+    cloudSync.pushUpdate(importedHabits, currentLogs, updatedSettings);
   };
 
   // Date shifting (Yesterday / Tomorrow)
@@ -248,7 +241,7 @@ export function App() {
     });
   }, []);
 
-  // Update Data callback for Developer Console
+  // Update Data callback from Cloud Sync / Backup Modal
   const handleUpdateData = (newHabits: Habit[], newLogs: Record<string, DayLog>, newSettings: WinterArcSettings) => {
     setHabits(newHabits);
     setLogs(newLogs);
@@ -275,10 +268,10 @@ export function App() {
   // Global Keyboard Shortcuts handler
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Secret Developer Console trigger: Ctrl + Shift + D
-      if (e.ctrlKey && e.shiftKey && (e.key === 'D' || e.key === 'd')) {
+      // Open Account & Sync modal: Ctrl + Shift + A or Ctrl + Shift + S
+      if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a' || e.key === 'S' || e.key === 's')) {
         e.preventDefault();
-        setIsDevModalOpen((prev) => !prev);
+        setIsAccountModalOpen((prev) => !prev);
         return;
       }
 
@@ -293,7 +286,7 @@ export function App() {
         setIsImportOpen(false);
         setIsAddOpen(false);
         setIsShortcutsOpen(false);
-        setIsDevModalOpen(false);
+        setIsAccountModalOpen(false);
         return;
       }
 
@@ -360,13 +353,12 @@ export function App() {
         return;
       }
 
-      // Numeric keys 1-9 to toggle habit by position
-      const num = parseInt(e.key, 10);
-      if (!isNaN(num) && num >= 1 && num <= 9 && activeTab === 'daily') {
-        const targetHabit = filteredDailyHabits[num - 1];
-        if (targetHabit) {
+      // Quick numbers 1-9 to toggle daily habit cards
+      if (/^[1-9]$/.test(e.key) && activeTab === 'daily') {
+        const index = parseInt(e.key, 10) - 1;
+        if (index < filteredDailyHabits.length) {
           e.preventDefault();
-          handleToggleHabit(targetHabit.id);
+          handleToggleHabit(filteredDailyHabits[index].id);
         }
       }
     };
@@ -376,11 +368,11 @@ export function App() {
   }, [
     todayDate,
     shiftDate,
-    handleToggleHabit,
     handleToggleSound,
     handleToggleDarkMode,
     handleToggleLayoutMode,
     filteredDailyHabits,
+    handleToggleHabit,
     activeTab,
   ]);
 
@@ -406,7 +398,7 @@ export function App() {
   }, [todayDate, logs, selectedDate, settings.dailyTargetPoints]);
 
   const handleShareStreak = () => {
-    const shareText = `🔥 I am on a ${streak}-day streak with ${currentLog.totalPoints} points on Momentum! #WinterArc`;
+    const shareText = `🔥 I am on a ${streak}-day streak with ${currentLog.totalPoints} points on Momentum! #PersonalGrowth`;
     if (navigator.share) {
       navigator.share({ title: 'Momentum Streak', text: shareText }).catch(() => {});
     } else {
@@ -423,8 +415,11 @@ export function App() {
       {/* App Container (Phone Frame vs Wide Desktop Dashboard) */}
       <div
         className={`w-full ${
-          isFullDashboard ? 'max-w-5xl' : 'max-w-[430px]'
+          isFullDashboard ? 'max-w-5xl' : 'max-w-[440px]'
         } bg-[#F9F8F5] dark:bg-stone-900 h-full sm:h-auto sm:min-h-[890px] sm:rounded-[48px] sm:shadow-2xl overflow-hidden flex flex-col justify-between border border-stone-200/50 dark:border-stone-800 transition-colors`}
+        style={{
+          paddingBottom: 'max(calc(env(safe-area-inset-bottom, 0px) + 8px), 14px)',
+        }}
       >
         {/* Top Header */}
         <Header
@@ -443,18 +438,18 @@ export function App() {
           layoutMode={layoutMode}
           onToggleLayoutMode={handleToggleLayoutMode}
           onOpenShortcuts={() => setIsShortcutsOpen(true)}
-          onOpenDevModal={() => setIsDevModalOpen(true)}
+          onOpenAccountModal={() => setIsAccountModalOpen(true)}
         />
 
         {/* Main Body per Active Tab */}
-        <main className="w-full px-4 sm:px-6 flex-1 space-y-4 pt-4 pb-6 overflow-y-auto smooth-momentum-scroll">
+        <main className="w-full px-4 sm:px-6 flex-1 space-y-4 pt-4 pb-4 overflow-y-auto smooth-momentum-scroll">
           {activeTab === 'daily' && (
             <div className="space-y-4 tab-content-enter">
               {/* Date Switcher Bar */}
               <div className="flex items-center justify-between px-1 text-xs text-stone-500 dark:text-stone-400">
                 <button
                   onClick={() => shiftDate(-1)}
-                  className="flex items-center gap-1 hover:text-stone-900 dark:hover:text-stone-100 p-1 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                  className="flex items-center gap-1 hover:text-stone-900 dark:hover:text-stone-100 p-1.5 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors active-tactile"
                   title="Previous Day (← / J)"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
@@ -483,7 +478,7 @@ export function App() {
 
                 <button
                   onClick={() => shiftDate(1)}
-                  className="flex items-center gap-1 hover:text-stone-900 dark:hover:text-stone-100 p-1 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                  className="flex items-center gap-1 hover:text-stone-900 dark:hover:text-stone-100 p-1.5 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors active-tactile"
                   title="Next Day (→ / K)"
                 >
                   <span>Next</span>
@@ -514,8 +509,8 @@ export function App() {
                           type="text"
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          placeholder="Filter today's tasks..."
-                          className="w-full bg-white dark:bg-stone-800/80 border border-stone-200/80 dark:border-stone-700/80 rounded-2xl pl-8.5 pr-4 py-2 text-xs text-stone-800 dark:text-stone-200 placeholder-stone-400 focus:outline-none focus:border-stone-400 dark:focus:border-stone-500 transition-all shadow-xs"
+                          placeholder="Filter today's habits..."
+                          className="w-full bg-white dark:bg-stone-850 border border-stone-200/80 dark:border-stone-700/80 rounded-2xl pl-8.5 pr-4 py-2 text-xs text-stone-800 dark:text-stone-200 placeholder-stone-400 focus:outline-none focus:border-stone-400 dark:focus:border-stone-500 transition-colors shadow-xs"
                         />
                         {searchQuery && (
                           <button
@@ -532,7 +527,7 @@ export function App() {
                           <button
                             key={cat}
                             onClick={() => setSelectedCategory(cat)}
-                            className={`px-2.5 py-1 rounded-full text-[11px] font-semibold whitespace-nowrap transition-all ${
+                            className={`px-2.5 py-1 rounded-full text-[11px] font-semibold whitespace-nowrap transition-colors active-tactile ${
                               selectedCategory === cat
                                 ? 'bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 shadow-xs'
                                 : 'bg-white dark:bg-stone-800/80 text-stone-600 dark:text-stone-400 border border-stone-200/80 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-700'
@@ -545,54 +540,31 @@ export function App() {
                     </div>
                   )}
 
-                  {/* Habit Checklist */}
+                  {/* Habit Checklist Cards */}
                   <div className="space-y-2.5">
-                    <div className="flex items-center justify-between px-1">
-                      <span className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400 flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Daily Tasks ({currentLog.completedHabitIds.length}/{habits.length})</span>
-                      </span>
-                      <span className="text-[11px] text-stone-400">
-                        Keys 1–9 or tap to check
-                      </span>
-                    </div>
-
-                    {habits.length === 0 ? (
-                      <div className="p-8 rounded-3xl bg-white dark:bg-stone-900 border border-dashed border-stone-200 dark:border-stone-800 text-center space-y-3 shadow-card">
-                        <p className="text-xs text-stone-500 dark:text-stone-400">
-                          No challenges active for this protocol yet.
+                    {filteredDailyHabits.length === 0 ? (
+                      <div className="p-8 rounded-3xl bg-white dark:bg-stone-900 border border-dashed border-stone-200 dark:border-stone-800 text-center space-y-2 shadow-card">
+                        <p className="text-xs text-stone-500">
+                          {habits.length === 0
+                            ? 'No habits created yet. Tap + or Import to start your journey.'
+                            : 'No habits match your active filter.'}
                         </p>
-                        <div className="flex justify-center gap-2">
-                          <button
-                            onClick={() => setIsImportOpen(true)}
-                            className="px-4 py-2 rounded-full bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 font-semibold text-xs flex items-center gap-1.5 shadow-sm active:scale-95"
-                          >
-                            <Sparkles className="w-4 h-4 text-amber-400" />
-                            <span>Import Notebook</span>
-                          </button>
-                        </div>
-                      </div>
-                    ) : filteredDailyHabits.length === 0 ? (
-                      <div className="p-6 rounded-3xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-center text-xs text-stone-400">
-                        No tasks match your filter.
                       </div>
                     ) : (
-                      <div className="space-y-2">
-                        {filteredDailyHabits.map((habit, idx) => (
-                          <HabitCard
-                            key={habit.id}
-                            habit={habit}
-                            isDone={currentLog.completedHabitIds.includes(habit.id)}
-                            onToggle={handleToggleHabit}
-                            onDelete={handleDeleteHabit}
-                            shortcutKey={idx + 1}
-                          />
-                        ))}
-                      </div>
+                      filteredDailyHabits.map((habit, idx) => (
+                        <HabitCard
+                          key={habit.id}
+                          habit={habit}
+                          isDone={currentLog.completedHabitIds.includes(habit.id)}
+                          onToggle={handleToggleHabit}
+                          onDelete={handleDeleteHabit}
+                          shortcutKey={idx + 1}
+                        />
+                      ))
                     )}
                   </div>
 
-                  {/* Memorable Moments & Reflection Card */}
+                  {/* Daily Memorable Moment / Reflection Card */}
                   <MemorableMomentCard
                     date={selectedDate}
                     isToday={isToday}
@@ -637,7 +609,7 @@ export function App() {
                           </span>
                           <button
                             onClick={() => setSelectedDate(dItem.date)}
-                            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                            className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors active-tactile ${
                               dItem.isTargetMet
                                 ? 'bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 shadow-xs'
                                 : 'bg-stone-200/80 dark:bg-stone-800 text-stone-400'
@@ -669,14 +641,11 @@ export function App() {
                     onToggleRestDay={handleToggleRestDay}
                   />
 
-                  {/* Dedicated Sponsored Partner & Streak Shield Card (Placed apart) */}
-                  <SponsoredRewardCard />
-
                   {/* Share Streak Button */}
                   <div className="pt-1">
                     <button
                       onClick={handleShareStreak}
-                      className="w-full bg-[#18181B] dark:bg-stone-100 dark:text-stone-900 hover:bg-black dark:hover:bg-white active:scale-[0.98] transition-all text-white font-medium py-3.5 px-6 rounded-full flex items-center justify-center space-x-2 shadow-lg"
+                      className="w-full bg-[#18181B] dark:bg-stone-100 dark:text-stone-900 hover:bg-black dark:hover:bg-white active-tactile text-white font-medium py-3.5 px-6 rounded-full flex items-center justify-center space-x-2 shadow-lg"
                       type="button"
                     >
                       <span className="text-sm font-semibold tracking-wide">
@@ -717,9 +686,6 @@ export function App() {
           )}
         </main>
 
-        {/* Sponsor Banner Slot */}
-        <PartnerBanner />
-
         {/* Modals */}
         <GeminiImportModal
           isOpen={isImportOpen}
@@ -738,14 +704,15 @@ export function App() {
           onClose={() => setIsShortcutsOpen(false)}
         />
 
-        <DeveloperModal
-          isOpen={isDevModalOpen}
-          onClose={() => setIsDevModalOpen(false)}
-          streak={streak}
+        {/* Clean Personal Account & Cross-Device Cloud Sync Modal */}
+        <AccountSyncModal
+          isOpen={isAccountModalOpen}
+          onClose={() => setIsAccountModalOpen(false)}
+          habits={habits}
+          logs={logs}
+          settings={settings}
           onUpdateData={handleUpdateData}
         />
-
-        <PartnerAdModal />
       </div>
     </div>
   );

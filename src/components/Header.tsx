@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Flame,
   Sparkles,
@@ -13,8 +13,10 @@ import {
   LayoutDashboard,
   Smartphone,
   Command,
-  ShieldAlert,
+  Cloud,
+  RefreshCw,
 } from 'lucide-react';
+import { cloudSync, type SyncStatus } from '../utils/firebaseSync';
 
 export type AppTab = 'daily' | 'challenges' | 'progress';
 
@@ -34,7 +36,7 @@ interface HeaderProps {
   layoutMode: 'mobile' | 'dashboard';
   onToggleLayoutMode: () => void;
   onOpenShortcuts: () => void;
-  onOpenDevModal: () => void;
+  onOpenAccountModal: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -52,32 +54,17 @@ export const Header: React.FC<HeaderProps> = ({
   layoutMode,
   onToggleLayoutMode,
   onOpenShortcuts,
-  onOpenDevModal,
+  onOpenAccountModal,
 }) => {
   const isToday = selectedDate === currentDate;
-  const clickCountRef = useRef(0);
-  const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>(() => cloudSync.getStatus());
 
-  const isDevAuth = localStorage.getItem('momentum_dev_authenticated') === 'true';
-
-  const handleTitleClick = () => {
-    if (isDevAuth) {
-      onOpenDevModal();
-      return;
-    }
-
-    clickCountRef.current += 1;
-    if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
-
-    if (clickCountRef.current >= 5) {
-      clickCountRef.current = 0;
-      onOpenDevModal();
-    } else {
-      clickTimerRef.current = setTimeout(() => {
-        clickCountRef.current = 0;
-      }, 2500);
-    }
-  };
+  useEffect(() => {
+    const unsub = cloudSync.onSyncChange((status) => {
+      setSyncStatus(status);
+    });
+    return unsub;
+  }, []);
 
   const formatDateLabel = (dateStr: string) => {
     const d = new Date(dateStr + 'T00:00:00');
@@ -89,6 +76,8 @@ export const Header: React.FC<HeaderProps> = ({
     { key: 'challenges', label: 'Challenges', icon: <ListChecks className="w-4 h-4" /> },
     { key: 'progress', label: 'Progress', icon: <BarChart2 className="w-4 h-4" /> },
   ];
+
+  const user = cloudSync.getUser();
 
   return (
     <header
@@ -104,17 +93,12 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={handleTitleClick}
-              className="text-left group cursor-pointer focus:outline-none"
-              title="Momentum • Creator Easter Egg (tap 5x for Developer Mode)"
+              onClick={onOpenAccountModal}
+              className="text-left group cursor-pointer focus:outline-none flex items-center gap-2 active-tactile"
+              title="Momentum • Personal Account & Sync Settings"
             >
               <h1 className="text-lg font-black tracking-tight text-stone-900 dark:text-stone-100 flex items-center gap-1.5 select-none">
                 Momentum
-                {isDevAuth && (
-                  <span className="text-[10px] px-1.5 py-0.2 rounded-md bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold border border-amber-500/30 flex items-center gap-0.5">
-                    <ShieldAlert className="w-2.5 h-2.5" /> Dev
-                  </span>
-                )}
                 <span className="text-xs font-normal text-stone-400 dark:text-stone-500">
                   • {isToday ? 'Today' : formatDateLabel(selectedDate)}
                 </span>
@@ -123,6 +107,41 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
+            {/* Cloud Sync Status Pill */}
+            <button
+              type="button"
+              onClick={onOpenAccountModal}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-bold transition-colors shadow-xs active-tactile ${
+                user
+                  ? 'bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300'
+                  : 'bg-stone-100 dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300'
+              }`}
+              title={
+                syncStatus.state === 'syncing'
+                  ? 'Synchronizing with cloud...'
+                  : user
+                  ? `Synced as ${user.email} (Tap for Account Settings)`
+                  : 'Sign in to sync across devices'
+              }
+            >
+              {syncStatus.state === 'syncing' ? (
+                <>
+                  <RefreshCw className="w-3 h-3 text-indigo-500 animate-spin" />
+                  <span className="hidden sm:inline text-[11px]">Syncing</span>
+                </>
+              ) : user ? (
+                <>
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="hidden sm:inline text-[11px]">Synced</span>
+                </>
+              ) : (
+                <>
+                  <Cloud className="w-3.5 h-3.5 text-stone-500" />
+                  <span className="hidden sm:inline text-[11px]">Sync</span>
+                </>
+              )}
+            </button>
+
             {/* Streak Badge */}
             <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-900/60 text-amber-600 dark:text-amber-400 text-xs font-bold shadow-xs">
               <Flame className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />

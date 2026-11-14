@@ -19,6 +19,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ 
     { key: 'S', desc: 'Toggle sound chimes (Mute/Unmute)' },
     { key: 'D', desc: 'Toggle Dark / Warm Light theme' },
     { key: 'V', desc: 'Toggle View (Desktop Dashboard / Mobile Frame)' },
+    { key: 'Ctrl + Shift + S', desc: 'Personal Account & Cloud Sync' },
     { key: '?', desc: 'Show keyboard shortcuts' },
     { key: 'Esc', desc: 'Close any active dialog' },
   ];
