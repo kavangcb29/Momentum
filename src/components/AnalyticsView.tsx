@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { DayLog, Habit, WinterArcSettings } from '../types';
 import { TrendingUp, Calendar, Download, Bookmark, BookOpen, ChevronRight } from 'lucide-react';
 import { exportToExcelCSV } from '../utils/exportUtils';
@@ -22,36 +22,47 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
 }) => {
   const [subTab, setSubTab] = useState<'analytics' | 'journal'>('analytics');
 
+  const [now] = useState(() => new Date());
+
   // Generate last 35 days calendar grid
-  const days: { dateStr: string; dayNum: number; points: number; percent: number }[] = [];
-  const today = new Date();
+  const days = useMemo(() => {
+    const list: { dateStr: string; dayNum: number; points: number; percent: number }[] = [];
 
-  for (let i = 34; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(today.getDate() - i);
-    const dateStr = d.toISOString().split('T')[0];
-    const log = logs[dateStr];
-    const pts = log ? log.totalPoints : 0;
-    const tgt = log ? log.targetPoints : settings.dailyTargetPoints;
-    const pct = Math.min(100, Math.round((pts / Math.max(1, tgt)) * 100));
+    for (let i = 34; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(now.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+      const log = logs[dateStr];
+      const pts = log ? log.totalPoints : 0;
+      const tgt = log ? log.targetPoints : settings.dailyTargetPoints;
+      const pct = Math.min(100, Math.round((pts / Math.max(1, tgt)) * 100));
 
-    days.push({
-      dateStr,
-      dayNum: d.getDate(),
-      points: pts,
-      percent: pct,
-    });
-  }
+      list.push({
+        dateStr,
+        dayNum: d.getDate(),
+        points: pts,
+        percent: pct,
+      });
+    }
+    return list;
+  }, [logs, now, settings.dailyTargetPoints]);
 
   // Calculate stats
-  const totalPointsAllTime = Object.values(logs).reduce((acc, l) => acc + l.totalPoints, 0);
-  const totalDaysLogged = Object.values(logs).filter((l) => l.totalPoints > 0).length;
-  const bestDay = Math.max(0, ...Object.values(logs).map((l) => l.totalPoints));
+  const { totalPointsAllTime, totalDaysLogged, bestDay } = useMemo(() => {
+    const logValues = Object.values(logs);
+    return {
+      totalPointsAllTime: logValues.reduce((acc, l) => acc + l.totalPoints, 0),
+      totalDaysLogged: logValues.filter((l) => l.totalPoints > 0).length,
+      bestDay: Math.max(0, ...logValues.map((l) => l.totalPoints)),
+    };
+  }, [logs]);
 
   // Extract all logged memorable moments sorted latest first
-  const memorableLogs = Object.values(logs)
-    .filter((l) => l.memorableMoment && l.memorableMoment.trim().length > 0)
-    .sort((a, b) => b.date.localeCompare(a.date));
+  const memorableLogs = useMemo(() => {
+    return Object.values(logs)
+      .filter((l) => l.memorableMoment && l.memorableMoment.trim().length > 0)
+      .sort((a, b) => b.date.localeCompare(a.date));
+  }, [logs]);
 
   return (
     <div className="space-y-4 tab-content-enter">

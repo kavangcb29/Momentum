@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Check, Bookmark } from 'lucide-react';
 
 interface MemorableMomentCardProps {
@@ -15,13 +15,15 @@ export const MemorableMomentCard: React.FC<MemorableMomentCardProps> = ({
   onSaveMoment,
 }) => {
   const [text, setText] = useState(memorableMoment);
+  const [prevMoment, setPrevMoment] = useState(memorableMoment);
   const [isSaved, setIsSaved] = useState(false);
 
-  // Sync state when date changes
-  useEffect(() => {
-    setText(memorableMoment || '');
+  // Sync state if prop changes without effect
+  if (memorableMoment !== prevMoment) {
+    setPrevMoment(memorableMoment);
+    setText(memorableMoment);
     setIsSaved(false);
-  }, [date, memorableMoment]);
+  }
 
   const handleBlur = () => {
     if (text !== memorableMoment) {

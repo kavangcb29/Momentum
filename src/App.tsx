@@ -35,9 +35,9 @@ import {
 export function App() {
   const [todayDate] = useState<string>(getTodayDateString());
   const [selectedDate, setSelectedDate] = useState<string>(todayDate);
-  const [habits, setHabits] = useState<Habit[]>([]);
-  const [logs, setLogs] = useState<Record<string, DayLog>>({});
-  const [settings, setSettings] = useState<WinterArcSettings>(getSettings());
+  const [habits, setHabits] = useState<Habit[]>(() => getHabits());
+  const [logs, setLogs] = useState<Record<string, DayLog>>(() => getLogs());
+  const [settings, setSettings] = useState<WinterArcSettings>(() => getSettings());
   const [activeTab, setActiveTab] = useState<AppTab>('daily');
 
   // Filter & Search states for daily checklist
@@ -67,12 +67,8 @@ export function App() {
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [copiedShare, setCopiedShare] = useState(false);
 
-  // Initialize data and Cloud Sync
+  // Initialize Cloud Sync on startup
   useEffect(() => {
-    setHabits(getHabits());
-    setLogs(getLogs());
-    setSettings(getSettings());
-
     // Attempt cloud sync on startup if signed in
     cloudSync.syncWithCloud().then((synced) => {
       setHabits(synced.habits);
@@ -98,14 +94,16 @@ export function App() {
   }, [isDarkMode]);
 
   // Current selected day log
-  const currentLog: DayLog = logs[selectedDate] || {
-    date: selectedDate,
-    completedHabitIds: [],
-    totalPoints: 0,
-    targetPoints: settings.dailyTargetPoints,
-    memorableMoment: '',
-    isRestDay: false,
-  };
+  const currentLog = useMemo<DayLog>(() => {
+    return logs[selectedDate] || {
+      date: selectedDate,
+      completedHabitIds: [],
+      totalPoints: 0,
+      targetPoints: settings.dailyTargetPoints,
+      memorableMoment: '',
+      isRestDay: false,
+    };
+  }, [logs, selectedDate, settings.dailyTargetPoints]);
 
   // Streak
   const streak = calculateStreak(logs, settings.dailyTargetPoints, settings.streakThresholdPercent);
@@ -566,6 +564,7 @@ export function App() {
 
                   {/* Daily Memorable Moment / Reflection Card */}
                   <MemorableMomentCard
+                    key={selectedDate}
                     date={selectedDate}
                     isToday={isToday}
                     memorableMoment={currentLog.memorableMoment}

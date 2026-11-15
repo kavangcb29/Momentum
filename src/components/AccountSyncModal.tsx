@@ -62,12 +62,14 @@ export const AccountSyncModal: React.FC<AccountSyncModalProps> = ({
     return unsub;
   }, []);
 
-  useEffect(() => {
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen);
     if (isOpen) {
       setErrorMsg('');
       setSuccessMsg('');
     }
-  }, [isOpen]);
+  }
 
   if (!isOpen) return null;
 
